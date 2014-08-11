@@ -1,0 +1,45 @@
+<head>
+  <title>WriteRealtime - Meteorjs contenteditable demo</title>
+</head>
+
+<body>
+</body>
+
+<template name="layout">
+	<div class="container">
+		<header>
+			{{> nav}}
+		</header>
+		{{> yield}}
+	</div>
+</template>
+
+<template name="nav">
+</template>
+
+<template name="fragment">
+	<div class="fragment-container">
+		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i></div>
+		<p contenteditable="true" data-id="{{this._id}}" data-rank="{{this.rank}}" class="fragment-text">{{this.text}}</p>
+	</div>
+</template>
+
+<template name="articles">
+	{{#each articles}}
+		{{>articleLink}}
+	{{/each}}
+	<button class="btn btn-primary add-new-article">Add New Article</button>
+	<a class="btn btn-default github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a>
+</template>
+
+<template name="articleLink">
+	<p><a href="{{linkUrl}}">{{linkText}}</a></p>
+</template>
+
+<template name="article">
+	<div class="fragments" data-id="{{this._id}}">
+		{{#each fragments}}
+			{{>fragment}}
+		{{/each}}
+	</div>
+</template>
