@@ -5,6 +5,9 @@
 .fragment-container {
 	padding-left: 40px;
 }
+.options {
+	float: right;
+}
 .handle {
 	float: left;
 	margin-right: 5px;

@@ -78,7 +78,7 @@ if (Meteor.isClient) {
           });
         }
       }
-      console.log('fragmentIds', fragmentIds);
+      //console.log('fragmentIds', fragmentIds);
     }
     else
     {
@@ -173,7 +173,7 @@ if (Meteor.isClient) {
 
     this.$('.fragments').sortable({
       helper: '.handle',
-      cancel: '[contenteditable]',
+      cancel: '[contenteditable],select',
       stop: function(event, ui) {
         updateDocumentFragments();
       },
@@ -187,30 +187,6 @@ if (Meteor.isClient) {
         $(event.target).focus();
       }
     })
-  };
-  Template.fragment.tag = function() {
-    if(this.tag)
-    {
-      return this.tag;
-    }
-    var tag = 'p';//Math.random() > 0.5 ? 'p' : 'h1';
-    //console.log('have been asked for tag, giving', tag);
-    return tag;
-  };
-  /*Template.fragment.tag = function() {
-    var node = document.createElement('p');
-    node.setAttribute("contenteditable", "true");
-    node.class = "fragment-text";
-    node.setAttribute("data-id", this._id);
-    $(node).text(this.text);
-    var html = $(node).clone().wrap('<div>').parent().html();
-    console.log(this, html);
-    return html;
-    //<{{tag}} contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</{{tag}}>
-  };*/
-
-  Template.fragment.rendered = function() {
-    this.$('.fragment-text').focus();
   };
 
   function restoreRange(el, id) {
@@ -397,7 +373,19 @@ if (Meteor.isClient) {
         restoreRange(e.currentTarget, this._id);
       }
     },
+    'click .fragment-set-tag': function(e, t) {
+      var tag = $(e.target).text();
+      console.log('setting tag', tag, 'on', this._id)
+      Fragments.update({_id: this._id}, {$set: {tag: tag}});
+    }
   });
+
+  Template.fragment.tag = function() {
+    return this.tag||'p';
+  };
+  Template.fragment.rendered = function() {
+    this.$('.fragment-text').focus();
+  };
 
   Template.articles.articles = function() {;
     return Articles.find({});

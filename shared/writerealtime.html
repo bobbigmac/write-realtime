@@ -31,9 +31,32 @@
 	<h2 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h2>
 </template>
 
+<template name="fragmenttagh3">
+	<h3 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h3>
+</template>
+
+<template name="fragmenttagh4">
+	<h4 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h4>
+</template>
+
 <template name="fragment">
 	<div class="fragment-container">
-		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i></div>
+		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i>
+		</div>
+		<div class="options">
+			<div class="btn-group">
+			  <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" value="h1">
+			    <span>{{tag}}</span><span class="caret"></span>
+			  </button>
+			  <ul class="dropdown-menu">
+			    <li><a href="#" class="fragment-set-tag">p</a></li>
+			    <li><a href="#" class="fragment-set-tag">h1</a></li>
+			    <li><a href="#" class="fragment-set-tag">h2</a></li>
+			    <li><a href="#" class="fragment-set-tag">h3</a></li>
+			    <li><a href="#" class="fragment-set-tag">h4</a></li>
+			  </ul>
+			</div>
+		</div>
 		{{#if equals tag "p"}}
 			{{>fragmenttagp}}
 		{{else}}
@@ -43,7 +66,15 @@
 				{{#if equals tag "h2"}}
 					{{>fragmenttagh2}}
 				{{else}}
-					{{>fragmenttagp}}
+					{{#if equals tag "h3"}}
+						{{>fragmenttagh3}}
+					{{else}}
+						{{#if equals tag "h4"}}
+							{{>fragmenttagh4}}
+						{{else}}
+							{{>fragmenttagp}}
+						{{/if}}
+					{{/if}}
 				{{/if}}
 			{{/if}}
 		{{/if}}
