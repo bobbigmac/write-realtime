@@ -11,7 +11,8 @@ if (Meteor.isClient) {
 
   var globalFragmentIds = false;
   function updateDocumentFragments(id, remove, position) {
-    var articleId = $('.fragments').data().id;
+    var articleId = $('.fragments').attr('data-id');//TODO: This is not getting correct id after creating new article (needs manual refresh to pop with correct val)
+    
     var article = Articles.findOne({_id: articleId});
     if(article)
     {
@@ -19,7 +20,7 @@ if (Meteor.isClient) {
 
       var fragmentIds = [];
       $('.fragment-text').each(function(pos, el) {
-        fragmentIds.push($(el).data().id);
+        fragmentIds.push($(el).attr('data-id'));
       });
 
       if(articleId)
@@ -58,7 +59,7 @@ if (Meteor.isClient) {
       if(changeCount)
       {
         globalFragmentIds = fragmentIds;
-        if(!(oldFragmentIds && oldFragmentIds.lenth > 0))
+        if(oldFragmentIds && oldFragmentIds.length > 0)
         {
           //Update mongo record with diff (so not sending entire list every change)
           var setFields = {};
@@ -66,21 +67,22 @@ if (Meteor.isClient) {
           {
             setFields['fragmentIds.'+pos] = diff[pos];
           }
-          Articles.update({ _id: articleId }, { $set: setFields });
+          Articles.update({ _id: articleId }, { $set: setFields }, function() {
+            //console.log('updated by diff');
+          });
         }
         else
         {
-          Articles.update({ _id: articleId }, { $set: { 'fragmentIds': fragmentIds }});
+          Articles.update({ _id: articleId }, { $set: { 'fragmentIds': fragmentIds }}, function() {
+            //console.log('updated all');
+          });
         }
       }
-      else
-      {
-        //console.log('nothing changed');
-      }
+      console.log('fragmentIds', fragmentIds);
     }
     else
     {
-      //console.log('No article', article);
+      console.log('No article', article);
     }
   }
 
@@ -92,6 +94,7 @@ if (Meteor.isClient) {
       var article = Articles.findOne({ _id: articleId });
       if(article)
       {
+        //var fragEndPoint = article.fragmentIds||Session.get('fragmentIds');
         var fragmentIds = _.toArray(article.fragmentIds)||[];
         
         var sortedFragments = [];
@@ -129,6 +132,7 @@ if (Meteor.isClient) {
       //console.log('no fragments');
       //globalFragmentIds = [];
     }
+
     return [{text: "", articleId: articleId}];
   }
 
@@ -156,7 +160,7 @@ if (Meteor.isClient) {
       var sel = window.getSelection && window.getSelection();
       if (sel && sel.rangeCount > 0) {
         var range = sel.getRangeAt(0);
-        var id = $(range.startContainer).parents('.fragment-text').first().data('id');
+        var id = $(range.startContainer).parents('.fragment-text').first().attr('data-id');
         if(id && (range.startOffset > 0 || range.endOffset > 0))
         {
           savedRanges[id] = { start: range.startOffset, end: range.endOffset };
@@ -184,6 +188,27 @@ if (Meteor.isClient) {
       }
     })
   };
+  Template.fragment.tag = function() {
+    if(this.tag)
+    {
+      return this.tag;
+    }
+    var tag = 'p';//Math.random() > 0.5 ? 'p' : 'h1';
+    //console.log('have been asked for tag, giving', tag);
+    return tag;
+  };
+  /*Template.fragment.tag = function() {
+    var node = document.createElement('p');
+    node.setAttribute("contenteditable", "true");
+    node.class = "fragment-text";
+    node.setAttribute("data-id", this._id);
+    $(node).text(this.text);
+    var html = $(node).clone().wrap('<div>').parent().html();
+    console.log(this, html);
+    return html;
+    //<{{tag}} contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</{{tag}}>
+  };*/
+
   Template.fragment.rendered = function() {
     this.$('.fragment-text').focus();
   };
@@ -227,10 +252,18 @@ if (Meteor.isClient) {
           if (sel.rangeCount) {
               range = sel.getRangeAt(0).cloneRange();
               if (range.getClientRects) {
-                  range.collapse(true);
-                  rect = range.getClientRects()[0];
+                range.collapse(true);
+                rect = range.getClientRects()[0];
+                if(rect)
+                {
                   x = rect.left;
                   y = rect.top;
+                }
+                else
+                {
+                  x = 0;
+                  y = 0;
+                }
               }
               // Fall back to inserting a temporary element
               if (x == 0 && y == 0) {
@@ -263,20 +296,24 @@ if (Meteor.isClient) {
   var startText = false;
   Template.fragment.events({
     'focus .fragment-text': function(e, t) {
-      startText = $(e.currentTarget).text();
+      var fragment = $(t.find('.fragment-text'));
+      startText = fragment.text();
       //$(e.currentTarget).attr('contenteditable', true);
     },
     'blur .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
       var newText = fragment.text();
-      //console.log('saving', newText, startText)
+      
+      //console.log('saving', newText, startText);
       if(newText != startText || !startText)
       {
         if(!newText)
         {
-          //console.log('this._id', this._id);
-          updateDocumentFragments(this._id, true);
-          Fragments.remove({ _id: this._id });
+          if(this._id)
+          {
+            updateDocumentFragments(this._id, true);
+            Fragments.remove({ _id: this._id });
+          }
         }
         else
         {
@@ -342,9 +379,9 @@ if (Meteor.isClient) {
           var position = false;
           //Use ctrl+enter to insert after the current fragment
           if(ctrlIsDown) {
-            position = (globalFragmentIds||[]).indexOf($(e.target).data().id)+1;
+            position = (globalFragmentIds||[]).indexOf($(e.target).attr('data-id'))+1;
           }
-          var articleId = $('.fragments').data().id;
+          var articleId = $('.fragments').attr('data-id');
           
           Fragments.insert({ text: '', articleId: articleId }, function(err, id) {
             updateDocumentFragments(id, false, position);

@@ -1,6 +1,9 @@
 Fragments = new Meteor.Collection('fragments');
 Articles = new Meteor.Collection('articles');
 
+Handlebars.registerHelper("equals", function (a, b) {
+	return (a == b);
+});
 
 Router.configure({
   layoutTemplate: 'layout'

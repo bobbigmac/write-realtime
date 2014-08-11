@@ -19,10 +19,34 @@
 	<a class="btn btn-default github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a>
 </template>
 
+<template name="fragmenttagp">
+	<p contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+</template>
+
+<template name="fragmenttagh1">
+	<h1 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h1>
+</template>
+
+<template name="fragmenttagh2">
+	<h2 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h2>
+</template>
+
 <template name="fragment">
 	<div class="fragment-container">
 		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i></div>
-		<p contenteditable="true" data-id="{{this._id}}" data-rank="{{this.rank}}" class="fragment-text">{{this.text}}</p>
+		{{#if equals tag "p"}}
+			{{>fragmenttagp}}
+		{{else}}
+			{{#if equals tag "h1"}}
+				{{>fragmenttagh1}}
+			{{else}}
+				{{#if equals tag "h2"}}
+					{{>fragmenttagh2}}
+				{{else}}
+					{{>fragmenttagp}}
+				{{/if}}
+			{{/if}}
+		{{/if}}
 	</div>
 </template>
 
