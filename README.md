@@ -5,7 +5,7 @@ Basic demo using contenteditable fields in meteorjs with collaborative editing, 
 Demo at http://writerealtime.meteor.com
 
 ## Known Issues
-- First attempt to save first fragment for a document fails, then should work as expected (diff-update related maybe?).
+- First attempt to save first fragment for a document fails, currently bodged by making new documents have at least one fragment.
 
 ## TODO
 - Add user model and remove insecure and autopublish

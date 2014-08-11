@@ -115,6 +115,11 @@ if (Meteor.isClient) {
         }
       }
     }
+    else
+    {
+      console.log('no fragments');
+      //globalFragmentIds = [];
+    }
     return [{text: "", articleId: articleId}];
   }
 
@@ -133,6 +138,11 @@ if (Meteor.isClient) {
       {
         ctrlIsDown = true;
       }
+    },
+    'click .add-new-article': function(e, t) {
+      Articles.insert({ }, function(err, id) {
+        addNewArticle(true);
+      });
     }
   });
 
@@ -180,11 +190,12 @@ if (Meteor.isClient) {
     'blur .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
       var newText = fragment.text();
-
+      //console.log('saving', newText, startText)
       if(newText != startText || !startText)
       {
         if(!newText)
         {
+          //console.log('this._id', this._id);
           updateDocumentFragments(this._id, true);
           Fragments.remove({ _id: this._id });
         }
@@ -258,7 +269,7 @@ if (Meteor.isClient) {
           }
         }
       }
-    }
+    },
   });
 
   Template.articles.articles = function() {;
@@ -269,17 +280,30 @@ if (Meteor.isClient) {
 
     },
     'click .add-new-article': function(e, t) {
-      Articles.insert({ }, function(err, id) {
-        if(!err)
-        {
-          Router.go('article', { _id: id });
-        }
-        else {
-          console.log('Could not create new article', err);
-        }
-      });
+      addNewArticle(true);
     }
   });
+  function addNewArticle(goTo) {
+    Articles.insert({ }, function(err, id) {
+      if(!err)
+      {
+        Fragments.insert({text: 'Welcome to your new document '+id, articleId: id}, function(err, fragId) {
+          if(!err)
+          {
+            Articles.update({ _id: id }, { $set: { fragmentIds: [fragId] }}, function(err, editOk) {
+              if(goTo)
+              {
+                Router.go('article', { _id: id });
+              }
+            });
+          }
+        });
+      }
+      else {
+        console.log('Could not create new article', err);
+      }
+    });
+  }
   Template.articleLink.linkUrl = function() {
     return Router.routes['article'].url({_id: this._id});
   }
