@@ -161,6 +161,9 @@ if (Meteor.isClient) {
         {
           savedRanges[id] = { start: range.startOffset, end: range.endOffset };
         }
+        else if(id) {
+          //savedRanges[id] = { start: 0, end: 0 };
+        }
       }
     });
 
@@ -185,6 +188,78 @@ if (Meteor.isClient) {
     this.$('.fragment-text').focus();
   };
 
+  function restoreRange(el, id) {
+    if(savedRanges[id] && (savedRanges[id].start || savedRanges[id].end)) {
+      if(window.getSelection) {
+        var range = document.createRange();
+        var sel = window.getSelection();
+        (function(el, sel, range, id) {
+          var maxLength = $(el).text().length;
+          var savedRange = savedRanges[id];
+          var startPos = (savedRange.start < maxLength ? savedRange.start : maxLength);
+          var endPos = (savedRange.end < maxLength ? savedRange.end : maxLength);
+          el.normalize();
+          try {
+            range.setStart(el.firstChild, startPos);
+            range.setEnd(el.lastChild, endPos);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+          catch(exc) {
+            console.log("Couldn't set a range for node", id) // can get exception when removing multiple fragments
+          }
+        })(el, sel, range, id);
+      }
+    }
+  }
+  function getSelectionCoords() {
+      var sel = document.selection, range, rect;
+      var x = 0, y = 0;
+      if (sel) {
+          if (sel.type != "Control") {
+              range = sel.createRange();
+              range.collapse(true);
+              x = range.boundingLeft;
+              y = range.boundingTop;
+          }
+      } else if (window.getSelection) {
+          sel = window.getSelection();
+          if (sel.rangeCount) {
+              range = sel.getRangeAt(0).cloneRange();
+              if (range.getClientRects) {
+                  range.collapse(true);
+                  rect = range.getClientRects()[0];
+                  x = rect.left;
+                  y = rect.top;
+              }
+              // Fall back to inserting a temporary element
+              if (x == 0 && y == 0) {
+                  var span = document.createElement("span");
+                  if (span.getClientRects) {
+                      // Ensure span has dimensions and position by
+                      // adding a zero-width space character
+                      span.appendChild( document.createTextNode("\u200b") );
+                      range.insertNode(span);
+                      rect = span.getClientRects()[0];
+                      x = rect.left;
+                      y = rect.top;
+                      var spanParent = span.parentNode;
+                      spanParent.removeChild(span);
+
+                      // Glue any broken text nodes back together
+                      spanParent.normalize();
+                  }
+              }
+          }
+      }
+      return { x: x, y: y };
+  }
+  var arrows = {
+    37: "left",
+    38: "up",
+    39: "right",
+    40: "down",
+  };
   var startText = false;
   Template.fragment.events({
     'focus .fragment-text': function(e, t) {
@@ -224,7 +299,39 @@ if (Meteor.isClient) {
       {
         $(e.target).text(startText);
       }
-      //TODO: Check for arrows (up on top row, down on bottom row, right at end pos, left at start pos)
+      else if(arrows[e.keyCode])
+      {
+        var dir = arrows[e.keyCode];
+        var coords = getSelectionCoords();
+        var el = $(e.target);
+        var offset = el.offset();
+        var height = el.height(), width = el.width(), top = coords.y - offset.top, left = coords.x - offset.left;
+        var lineHeight = 20; //TODO: By actual line-height
+
+        if((dir == "up" && top <= 2) ||
+          (dir == "down" && top >= (height - lineHeight)))
+        {
+          var nextText = false;
+          if(dir == "up")
+          {
+            nextText = el.parent().prev().find('.fragment-text').first();
+          }
+          else
+          {
+            nextText = el.parent().next().find('.fragment-text').first();
+          }
+          if(nextText && nextText.length > 0)
+          {
+            nextText.focus();
+            //restoreRange(e.target, this._id);//This will only work if you detect and ignore onselectionchanged for this keydown
+            return false;
+          }
+        }
+        else //TODO: Left/right for paragraph style/reference options UI
+        {
+
+        }
+      }
     },
     'keyup .fragment-text': function(e, t) {
       if(e.keyCode == 13)
@@ -250,28 +357,7 @@ if (Meteor.isClient) {
         return false;
       }
       else if(e.keyCode == 9) {
-        if(savedRanges[this._id]) {
-          if(window.getSelection) {
-            var range = document.createRange();
-            var sel = window.getSelection();
-            (function(el, sel, range, id) {
-              var maxLength = $(el).text().length;
-              var savedRange = savedRanges[id];
-              var startPos = (savedRange.start < maxLength ? savedRange.start : maxLength);
-              var endPos = (savedRange.end < maxLength ? savedRange.end : maxLength);
-              el.normalize();
-              try {
-                range.setStart(el.firstChild, startPos);
-                range.setEnd(el.lastChild, endPos);
-                sel.removeAllRanges();
-                sel.addRange(range);
-              }
-              catch(exc) {
-                console.log("Couldn't set a range for node", id) // can get exception when removing multiple fragments
-              }
-            })(e.currentTarget, sel, range, this._id);
-          }
-        }
+        restoreRange(e.currentTarget, this._id);
       }
     },
   });
