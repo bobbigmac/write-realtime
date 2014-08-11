@@ -4,6 +4,7 @@
 }
 .fragment-container {
 	padding-left: 40px;
+	clear: right;
 }
 .options {
 	float: right;

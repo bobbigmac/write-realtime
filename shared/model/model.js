@@ -1,8 +1,11 @@
 Fragments = new Meteor.Collection('fragments');
 Articles = new Meteor.Collection('articles');
 
-Handlebars.registerHelper("equals", function (a, b) {
+UI.registerHelper("equals", function (a, b) {
 	return (a == b);
+});
+UI.registerHelper('selected', function(key, value){
+	return key == value ? {selected:'selected'} : '';
 });
 
 Router.configure({

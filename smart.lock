@@ -4,7 +4,8 @@
     "basePackages": {
       "bootstrap-3": {},
       "iron-router": {},
-      "jquery-ui": {}
+      "jquery-ui": {},
+      "bootstrap-select": {}
     },
     "packages": {
       "bootstrap-3": {
@@ -21,6 +22,11 @@
         "git": "https://github.com/TimHeckel/meteor-jquery-ui.git",
         "tag": "v1.9.2",
         "commit": "c437d45edcf1367df8d5ffa8bad2867758030bd2"
+      },
+      "bootstrap-select": {
+        "git": "https://github.com/amrali/bootstrap-select-meteor.git",
+        "tag": "v1.5.4",
+        "commit": "de99107c031dad11327b7739e9f7b389a229c63f"
       },
       "iron-layout": {
         "git": "https://github.com/EventedMind/iron-layout.git",

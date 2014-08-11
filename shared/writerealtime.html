@@ -39,45 +39,44 @@
 	<h4 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h4>
 </template>
 
-<template name="fragment">
-	<div class="fragment-container">
-		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i>
-		</div>
-		<div class="options">
-			<div class="btn-group">
-			  <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown" value="h1">
-			    <span>{{tag}}</span><span class="caret"></span>
-			  </button>
-			  <ul class="dropdown-menu">
-			    <li><a href="#" class="fragment-set-tag">p</a></li>
-			    <li><a href="#" class="fragment-set-tag">h1</a></li>
-			    <li><a href="#" class="fragment-set-tag">h2</a></li>
-			    <li><a href="#" class="fragment-set-tag">h3</a></li>
-			    <li><a href="#" class="fragment-set-tag">h4</a></li>
-			  </ul>
-			</div>
-		</div>
-		{{#if equals tag "p"}}
-			{{>fragmenttagp}}
+<template name="fragmentproxy">
+	{{#if equals tag "p"}}
+		{{>fragmenttagp}}
+	{{else}}
+		{{#if equals tag "h1"}}
+			{{>fragmenttagh1}}
 		{{else}}
-			{{#if equals tag "h1"}}
-				{{>fragmenttagh1}}
+			{{#if equals tag "h2"}}
+				{{>fragmenttagh2}}
 			{{else}}
-				{{#if equals tag "h2"}}
-					{{>fragmenttagh2}}
+				{{#if equals tag "h3"}}
+					{{>fragmenttagh3}}
 				{{else}}
-					{{#if equals tag "h3"}}
-						{{>fragmenttagh3}}
+					{{#if equals tag "h4"}}
+						{{>fragmenttagh4}}
 					{{else}}
-						{{#if equals tag "h4"}}
-							{{>fragmenttagh4}}
-						{{else}}
-							{{>fragmenttagp}}
-						{{/if}}
+						{{>fragmenttagp}}
 					{{/if}}
 				{{/if}}
 			{{/if}}
 		{{/if}}
+	{{/if}}
+</template>
+
+<template name="fragment">
+	<div class="fragment-container" data-id="{{this._id}}">
+		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i>
+		</div>
+		<div class="options">
+			<select class="form-control fragment-set-tag" tabindex="-1">
+			  <option {{selected tag "p"}}>p</option>
+			  <option {{selected tag "h1"}}>h1</option>
+			  <option {{selected tag "h2"}}>h2</option>
+			  <option {{selected tag "h3"}}>h3</option>
+			  <option {{selected tag "h4"}}>h4</option>
+			</select>
+		</div>
+		{{>fragmentproxy}}
 	</div>
 </template>
 

@@ -78,7 +78,6 @@ if (Meteor.isClient) {
           });
         }
       }
-      //console.log('fragmentIds', fragmentIds);
     }
     else
     {
@@ -121,16 +120,7 @@ if (Meteor.isClient) {
           }
           return sortedFragments;
         }
-        else
-        {
-          //console.log('no sorted fragments to push')
-        }
       }
-    }
-    else
-    {
-      //console.log('no fragments');
-      //globalFragmentIds = [];
     }
 
     return [{text: "", articleId: articleId}];
@@ -280,7 +270,6 @@ if (Meteor.isClient) {
       var fragment = $(t.find('.fragment-text'));
       var newText = fragment.text();
       
-      //console.log('saving', newText, startText);
       if(newText != startText || !startText)
       {
         if(!newText)
@@ -373,21 +362,36 @@ if (Meteor.isClient) {
         restoreRange(e.currentTarget, this._id);
       }
     },
-    'click .fragment-set-tag': function(e, t) {
-      var tag = $(e.target).text();
-      console.log('setting tag', tag, 'on', this._id)
+    'change .fragment-set-tag': function(e, t) {
+      var tag = $(e.target).val();
       Fragments.update({_id: this._id}, {$set: {tag: tag}});
     }
   });
 
-  Template.fragment.tag = function() {
+  function onTagTypeRefresh() {
+    var sPicker = $('.fragment-container[data-id="' + this.data._id + '"] .fragment-set-tag');
+    sPicker.selectpicker('refresh');
+  }
+
+  //Bind refresh of the non-reactive select when tagtype is changed remotely
+  Template.fragmenttagh4.rendered = 
+  Template.fragmenttagh3.rendered = 
+  Template.fragmenttagh2.rendered = 
+  Template.fragmenttagh1.rendered = 
+  Template.fragmenttagp.rendered = onTagTypeRefresh; //TODO: Define these from supportedTags array
+
+  Template.fragment.tag = function(e, t) {
     return this.tag||'p';
   };
+  var renderTimeout = false;
   Template.fragment.rendered = function() {
+    this.$('.fragment-set-tag').selectpicker();
+
+    //TODO: Probably want to focus only after an enter-press
     this.$('.fragment-text').focus();
   };
 
-  Template.articles.articles = function() {;
+  Template.articles.articles = function() {
     return Articles.find({});
   }
   Template.articles.events({
