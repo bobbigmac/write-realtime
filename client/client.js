@@ -1,5 +1,14 @@
 
 if (Meteor.isClient) {
+
+  Template.nav.events({
+    'click .add-new-article': function(e, t) {
+      Articles.insert({ }, function(err, id) {
+        addNewArticle(true);
+      });
+    }
+  });
+
   var globalFragmentIds = false;
   function updateDocumentFragments(id, remove, position) {
     var articleId = $('.fragments').data().id;
@@ -117,7 +126,7 @@ if (Meteor.isClient) {
     }
     else
     {
-      console.log('no fragments');
+      //console.log('no fragments');
       //globalFragmentIds = [];
     }
     return [{text: "", articleId: articleId}];
@@ -138,11 +147,6 @@ if (Meteor.isClient) {
       {
         ctrlIsDown = true;
       }
-    },
-    'click .add-new-article': function(e, t) {
-      Articles.insert({ }, function(err, id) {
-        addNewArticle(true);
-      });
     }
   });
 
@@ -278,9 +282,6 @@ if (Meteor.isClient) {
   Template.articles.events({
     'click .remove-article': function(e, t) {
 
-    },
-    'click .add-new-article': function(e, t) {
-      addNewArticle(true);
     }
   });
   function addNewArticle(goTo) {
