@@ -7,7 +7,8 @@
 	clear: right;
 }
 .options {
-	float: right;
+	float: left;
+	margin-left: -80px;
 }
 .handle {
 	float: left;
@@ -17,6 +18,27 @@
 	opacity: 0.1;
 	font-size: 1.4em;
 	line-height: 1em;
+}
+.select-transparent .caret {
+	display: none;
+}
+.select-transparent::before, 
+.select-transparent::after {
+    border: none;
+    content: none;
+}
+.select-transparent button span.text,
+.select-transparent button .filter-option {
+	text-align: center !important;
+}
+.select-transparent > button {
+	outline: 0;
+	border: 0;
+	text-align: right;
+	padding-right: 0px !important;
+	line-height: 20px;
+	opacity: 0.3;
+	background-color: transparent;
 }
 .github-link, 
 .add-new-article {

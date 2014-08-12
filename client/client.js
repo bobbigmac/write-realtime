@@ -335,7 +335,8 @@ if (Meteor.isClient) {
           if(dir == 'left' && left <= 2)
           {
             //TODO: Currently setting next available objects in code, but could be cleverer about what grabs focus next.
-            var typeEl = el.parent().find('div.fragment-set-tag .selectpicker');
+            var typeEl = el.parent().find('.fragment-set-tag .selectpicker');
+            //$(t.find('.fragment-set-tag')).selectpicker('show');
 
             var el = typeEl.get(0);
             if(el)
