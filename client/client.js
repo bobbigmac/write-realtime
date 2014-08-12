@@ -318,10 +318,12 @@ if (Meteor.isClient) {
     'focus .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
       startText = fragment.text();
+      fragment.parents('.fragment-container').attr('focussed', 'true');
       //$(e.currentTarget).attr('contenteditable', true);
     },
     'blur .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
+      fragment.parents('.fragment-container').removeAttr('focussed');
       var newText = fragment.text();
       var tag = this.tag;
 

@@ -42,7 +42,8 @@
 	line-height: 1em;
 }
 /*.handle[editable="true"],*/
-.fragment-container[editable="true"] .options {
+.fragment-container[editable="true"][focussed="true"] .options,
+.fragment-container[editable="true"]:hover .options {
 	display: block;
 }
 .select-transparent .caret {
