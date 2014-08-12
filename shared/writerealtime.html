@@ -48,6 +48,18 @@
 	<span contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</span>
 </template>
 
+<template name="fragmenttagmeta">
+	{{#if editing}}
+		<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	{{else}}
+		<meta data-id="{{this._id}}" class="fragment-text" name="{{split this.text ':' 0}}" content="{{split this.text ':' 1}}" />
+	{{/if}}
+</template>
+
+<template name="fragmenttagtag">
+	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+</template>
+
 <template name="fragmenttagp">
 	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
 </template>
@@ -102,7 +114,15 @@
 											{{#if equals tag "hr"}}
 												{{>fragmenttaghr}}
 											{{else}}
-												{{>fragmenttagp}}
+												{{#if equals tag "tag"}}
+													{{>fragmenttagtag}}
+												{{else}}
+													{{#if equals tag "meta"}}
+														{{>fragmenttagmeta}}
+													{{else}}
+														{{>fragmenttagp}}
+													{{/if}}
+												{{/if}}
 											{{/if}}
 										{{/if}}
 									{{/if}}
@@ -118,8 +138,7 @@
 
 <template name="fragment">
 	<div class="fragment-container" data-id="{{this._id}}" data-tag="{{tag}}" editable="{{editable}}" data-inline="{{inline}}">
-		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i>
-		</div>
+		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i></div>
 		<div class="options">
 			<select class="form-control select-transparent fragment-set-tag" tabindex="-1" data-width="40">
 			  <option {{selected tag "p"}}>p</option>
@@ -130,6 +149,8 @@
 			  <option {{selected tag "h4"}}>h4</option>
 			  <option {{selected tag "bq"}}>bq</option>
 			  <option {{selected tag "nb"}}>nb</option>
+			  <option {{selected tag "tag"}}>tag</option>
+			  <option {{selected tag "meta"}}>meta</option>
 			</select>
 		</div>
 		{{>fragmentproxy}}

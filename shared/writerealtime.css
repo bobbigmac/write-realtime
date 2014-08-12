@@ -1,5 +1,6 @@
 .fragments {
 	padding-left: 40px;
+	padding-bottom: 200px;
 }
 .fragment-text {
 	white-space: pre-wrap;
@@ -7,16 +8,38 @@
 .fragment-container {
 	position: relative;
 }
+.fragment-container[data-tag="tag"] p {
+	opacity: 0.5;
+	display: inline-block;
+	margin: 5px;
+}
+.fragment-container[data-tag="tag"][editable="true"] p,
+.fragment-container[data-tag="meta"][editable="true"] p {
+	opacity: 0.5;
+}
+.fragment-container[data-tag="tag"][editable="true"] p:focus,
+.fragment-container[data-tag="meta"][editable="true"] p:focus {
+	opacity: 1;
+}
 .fragment-container[data-tag="nb"][editable="true"] p {
 	background-color: #eee;
 }
 .fragment-container[data-tag="nb"][editable="true"] {
 	display: block;
 }
+.fragment-container[data-tag="tag"] .fragment-text,
 .fragment-container[data-inline="true"] .fragment-text {
-	display: inline-block;	
+	display: inline-block;
 	float: left;
 	margin: 0;
+}
+.fragment-container[data-inline="false"] {
+	clear: left;
+}
+.fragment-container[data-tag="tag"] {
+	clear: none;
+	margin-right: 10px;
+	float: left;
 }
 .fragment-container[data-inline="true"] {
 	display: inline-block;

@@ -4,6 +4,9 @@ Articles = new Meteor.Collection('articles');
 UI.registerHelper("equals", function (a, b) {
 	return (a == b);
 });
+UI.registerHelper("split", function (text, sep, index) {
+	return (text||':').split(sep||':')[index];
+});
 function Linkify(inputText) {
 	//See http://stackoverflow.com/a/2166104/1358220
 	//URLs starting with http://, https://, or ftp://

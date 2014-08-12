@@ -412,7 +412,7 @@ if (Meteor.isClient) {
               var position = (globalFragmentIds||[]).indexOf(fragmentId)+1;//+offset;
               var articleId = $('.fragments').attr('data-id');
 
-              Fragments.insert({ text: currText, articleId: articleId }, function(err, id) {
+              Fragments.insert({ text: currText, articleId: articleId, tag: (this.tag == 'tag' ? this.tag : 'p') }, function(err, id) {
                 chainedFragmentIds.push(id);
                 if((offset+1) == chainedFragmentIds.length)
                 {
@@ -514,7 +514,7 @@ if (Meteor.isClient) {
           }
           var articleId = $('.fragments').attr('data-id');//TODO: Support displaying multiple articles in a single page/view t.parent.something
 
-          Fragments.insert({ text: '', articleId: articleId, inline: !!this.inline }, function(err, id) {
+          Fragments.insert({ text: '', articleId: articleId, inline: !!this.inline, tag: (this.tag == 'tag' ? this.tag : 'p') }, function(err, id) {
             updateDocumentFragments(id, false, position);
           });
         }
@@ -538,7 +538,6 @@ if (Meteor.isClient) {
         restoreRange(e.currentTarget, this._id);
       }
       else if(e.keyCode == 73 && ctrlIsDown) {
-        //console.log('this.inline', this.inline);
         var el = $(e.target);
         var id = el.attr('data-id');
 
@@ -546,7 +545,7 @@ if (Meteor.isClient) {
       }
     },
     'keypress .fragment-text': function(e, t) {
-      console.log(e.which, e.ctrlKey, e.metaKey);
+      //console.log(e.which, e.ctrlKey, e.metaKey);
       if(e.which == 34 && this.tag != 'q' && this.tag != 'bq')
       {
         var el = $(e.target);
