@@ -11,8 +11,9 @@ if (Meteor.isClient) {
 
   var globalFragmentIds = false;
   function updateDocumentFragments(id, remove, position) {
-    var articleId = $('.fragments').attr('data-id');//TODO: This is not getting correct id after creating new article (needs manual refresh to pop with correct val)
-    
+    id = (id instanceof Array ? id : (id ? [id] : []));
+
+    var articleId = $('.fragments').attr('data-id');
     var article = Articles.findOne({_id: articleId});
     if(article)
     {
@@ -25,26 +26,27 @@ if (Meteor.isClient) {
 
       if(articleId)
       {
-        var fragIndex = fragmentIds.indexOf(id);
-        
-        if(!remove && fragIndex === -1)
+        for(var idPos = id.length-1; idPos >= 0; idPos--)
         {
-          if(position !== false && position > -1)
+          var fragId = id[idPos];
+          var fragIndex = fragmentIds.indexOf(fragId);
+          
+          if(!remove && fragIndex === -1)
           {
-            fragmentIds.splice(position, 0, id);
+            if(position !== false && position > -1)
+            {
+              fragmentIds.splice(position, 0, fragId);
+            }
+            else
+            {
+              fragmentIds.push(fragId);
+            }
           }
-          else
+          else if(remove && fragIndex > -1)
           {
-            fragmentIds.push(id);
+            fragmentIds.splice(fragIndex, 1);
           }
         }
-        else if(remove && fragIndex > -1)
-        {
-          fragmentIds.splice(fragIndex, 1);
-        }
-      }
-      function highestOf(a, b) {
-        return (a > b ? a : b);
       }
       var diff = {}, changeCount = 0;
       for(var i=0; i<highestOf(fragmentIds.length, oldFragmentIds.length); i++)
@@ -205,13 +207,15 @@ if (Meteor.isClient) {
   }
   function getSelectionCoords() {
       var sel = document.selection, range, rect;
-      var x = 0, y = 0;
+      var x = 0, y = 0, start = 0, end = 0;
       if (sel) {
           if (sel.type != "Control") {
               range = sel.createRange();
               range.collapse(true);
               x = range.boundingLeft;
               y = range.boundingTop;
+              start = range.startOffset||0;
+              end = range.endOffset||0;
           }
       } else if (window.getSelection) {
           sel = window.getSelection();
@@ -224,11 +228,15 @@ if (Meteor.isClient) {
                 {
                   x = rect.left;
                   y = rect.top;
+                  start = range.startOffset;
+                  end = range.endOffset;
                 }
                 else
                 {
                   x = 0;
                   y = 0;
+                  start = false;
+                  end = false;
                 }
               }
               // Fall back to inserting a temporary element
@@ -251,7 +259,10 @@ if (Meteor.isClient) {
               }
           }
       }
-      return { x: x, y: y };
+      return { x: x, y: y, start: start, end: end };
+  }
+  function highestOf(a, b) {
+    return (a > b ? a : b);
   }
   var arrows = {
     37: "left",
@@ -269,10 +280,24 @@ if (Meteor.isClient) {
     'blur .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
       var newText = fragment.text();
-      
-      if(newText != startText || !startText)
+
+      var firstText = newText, allTexts = [];
+      if(newText)
       {
-        if(!newText)
+        if(firstText.indexOf("\n") > -1)
+        {
+          allTexts = newText.trim().replace(/[\r\n]+/, '\n').split('\n');
+          firstText = (allTexts[0]||'').trim();
+        }
+        else
+        {
+          firstText = newText;
+        }
+      }
+      
+      if(firstText != startText || !startText)
+      {
+        if(!firstText)
         {
           if(this._id)
           {
@@ -282,15 +307,45 @@ if (Meteor.isClient) {
         }
         else
         {
-          Fragments.update({_id: this._id}, { $set: { text: newText }});
+          Fragments.update({_id: this._id}, { $set: { text: firstText }});
 
           //bodges around meteor concatenating session values to div content on rerender (okay here because we're not listening on changed event)
           fragment.text('');
         }
       }
+      else
+      {
+        fragment.text(startText);
+      }
+
+      if(allTexts && allTexts.length > 1)
+      {
+        var adding = 0;
+        for(var i = 1; i < allTexts.length; i++)
+        {
+          var currText = allTexts[i] && allTexts[i].trim();
+          if(currText)
+          {
+            var chainedFragmentIds = [];
+            (function(fragmentId, offset) {
+              var position = (globalFragmentIds||[]).indexOf(fragmentId)+1;//+offset;
+              var articleId = $('.fragments').attr('data-id');
+
+              Fragments.insert({ text: currText, articleId: articleId }, function(err, id) {
+                chainedFragmentIds.push(id);
+                if((offset+1) == chainedFragmentIds.length)
+                {
+                  updateDocumentFragments(chainedFragmentIds, false, position);
+                }
+              });
+            })(fragment.attr('data-id'), adding);
+            adding++;
+          }
+        }
+      }
+
       startText = false;
       ctrlIsDown = false;
-      //$(e.currentTarget).removeAttr('contenteditable');
     },
     'keydown .fragment-text': function(e, t) {
       if(e.keyCode == 13)
@@ -304,12 +359,14 @@ if (Meteor.isClient) {
       else if(arrows[e.keyCode])
       {
         var dir = arrows[e.keyCode];
-        var coords = getSelectionCoords();
         var el = $(e.target);
+        var coords = getSelectionCoords();
         var offset = el.offset();
-        var height = el.height(), width = el.width(), top = coords.y - offset.top, left = coords.x - offset.left;
+        var scrollTop = $(window).scrollTop(), scrollLeft = $(window).scrollLeft();//This may not play well inside iframes
+        var height = el.height(), width = el.width(), top = coords.y - offset.top + scrollTop, left = coords.x - offset.left + scrollLeft;
 
-        var lineHeight = parseInt(el.css('line-height')), lineHeightModifier = 1.5;
+        var lineHeight = highestOf(parseInt(el.css('line-height')), parseInt(el.css('font-size')));
+        var lineHeightModifier = 1.5;
 
         if((dir == "up" && top <= 2) ||
           (dir == "down" && top >= (height - (lineHeight * lineHeightModifier))))
