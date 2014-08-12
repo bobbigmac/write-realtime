@@ -8,9 +8,14 @@
 }
 .options {
 	float: left;
-	margin-left: -80px;
+	margin-right: 5px;
+	margin-left: -40px;
+	/*width: 25px;*/
+	font-size: 1.4em;
+	line-height: 1em;
 }
 .handle {
+	display: none;
 	float: left;
 	margin-right: 5px;
 	margin-left: -30px;
@@ -30,12 +35,14 @@
 .select-transparent button span.text,
 .select-transparent button .filter-option {
 	text-align: center !important;
+	width: auto !important;
+	float: none !important;
 }
 .select-transparent > button {
 	outline: 0;
 	border: 0;
-	text-align: right;
-	padding-right: 0px !important;
+	box-shadow: none;
+	text-align: center;
 	line-height: 20px;
 	opacity: 0.3;
 	background-color: transparent;

@@ -162,8 +162,8 @@ if (Meteor.isClient) {
     });
 
     this.$('.fragments').sortable({
-      helper: '.handle',
-      cancel: '[contenteditable],select',
+      helper: '.options',
+      cancel: '[contenteditable]',
       stop: function(event, ui) {
         updateDocumentFragments();
       },
