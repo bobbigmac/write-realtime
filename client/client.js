@@ -417,6 +417,8 @@ if (Meteor.isClient) {
     'keyup .fragment-text': function(e, t) {
       if(e.keyCode == 13)
       {
+        //TODO: If caret is between text (has before and after), edit fragment, and create new fragment at next position with 'after' text
+        //TODO: If caret is selection, remove selection from fragment and create fragment in next position
         var nextText = $(e.target).parent().next().find('.fragment-text').first();
         if(!(nextText && nextText.length > 0) || ctrlIsDown)
         {
