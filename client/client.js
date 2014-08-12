@@ -5,8 +5,9 @@ if (Meteor.isClient) {
 
   Template.nav.events({
     'click .edit-article': function(e, t) {
-      Session.set('editing', !Session.get('editing'));
-      $('.fragments').sortable("option", "disabled", !Session.get('editing'))
+      var isEditing = Session.get('editing');
+      Session.set('editing', !isEditing);
+      $('.fragments').sortable("option", "disabled", isEditing)
     },
     'click .add-new-article': function(e, t) {
       //Articles.insert({ }, function(err, id) {
@@ -106,7 +107,6 @@ if (Meteor.isClient) {
       console.log('No article', article);
     }
   }
-
   Template.article.fragments = function () {
     var articleId = this._id;
     var fragments = Fragments.find({ articleId: articleId });
@@ -140,6 +140,7 @@ if (Meteor.isClient) {
               sortedFragments.push(fragId);
             }
           }
+
           return sortedFragments;
         }
       }
@@ -296,13 +297,18 @@ if (Meteor.isClient) {
   };
   var startText = false;
   Template.fragment.events({
+    /*'change .fragment-text': function(e, t) {
+      console.log('changed');
+    },*/
     'paste .fragment-text': function(e, t) {
       //Safely parsing html/markup/scripts is a LOT more complicated, tackle it if you dare :)
       var text = (e.originalEvent || e).clipboardData.getData('text/plain');
       if(text && typeof(text) == 'string' && text.trim())
       {
-        e.preventDefault();
-        $(e.target).text(text);
+        //e.preventDefault();
+
+        //TODO: Insert at caret or replace selection, don't replace entire text
+        //$(e.target).text(text);
       }
     },
     'dblclick .fragment-text': function(e, t) {
@@ -317,6 +323,7 @@ if (Meteor.isClient) {
     'blur .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
       var newText = fragment.text();
+      var tag = this.tag;
 
       var firstText = newText, allTexts = [];
       if(newText)
@@ -334,6 +341,10 @@ if (Meteor.isClient) {
       
       if(firstText != startText || !startText)
       {
+        if(tag == 'hr' && !firstText)
+        {
+          firstText = '-';
+        }
         if(!firstText)
         {
           if(this._id)
@@ -500,6 +511,11 @@ if (Meteor.isClient) {
   }
 
   //Bind refresh of the non-reactive select when tagtype is changed remotely
+  Template.fragmenttaghr.rendered = 
+  Template.fragmenttagtable.rendered = 
+  Template.fragmenttagspan.rendered = 
+  Template.fragmenttagquote.rendered = 
+  Template.fragmenttagblockquote.rendered = 
   Template.fragmenttagh4.rendered = 
   Template.fragmenttagh3.rendered = 
   Template.fragmenttagh2.rendered = 

@@ -7,17 +7,20 @@
 	padding-left: 40px;
 	clear: right;
 }
-.fragment-container[data-tag="sh"] {
+.fragment-container[data-tag="nb"] {
 	display: none;
 }
-.fragment-container[data-tag="sh"][editable="true"] p {
+.fragment-container[data-tag="nb"][editable="true"] p {
 	background-color: #eee;
 }
-.fragment-container[data-tag="sh"][editable="true"] {
+.fragment-container[data-tag="nb"][editable="true"] {
 	display: block;
 }
 .fragment-container[data-tag="span"] {
 	display: inline-block;
+}
+.fragment-container[editable="true"] hr {
+	height: 25px;
 }
 .options {
 	display: none;

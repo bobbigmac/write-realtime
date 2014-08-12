@@ -24,6 +24,14 @@
 	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
 </template>
 
+<template name="fragmenttaghr">
+	{{#if editing}}
+		<hr data-id="{{this._id}}" class="fragment-text" />
+	{{else}}
+		<hr data-id="{{this._id}}" class="fragment-text" />
+	{{/if}}
+</template>
+
 <template name="fragmenttagtable">
 	<table contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</table>
 </template>
@@ -79,7 +87,7 @@
 						{{#if equals tag "span"}}
 							{{>fragmenttagspan}}
 						{{else}}
-							{{#if equals tag "sh"}}
+							{{#if equals tag "nb"}}
 								{{>fragmenttagprivate}}
 							{{else}}
 								{{#if equals tag "bq"}}
@@ -91,7 +99,11 @@
 										{{#if equals tag "table"}}
 											{{>fragmenttagtable}}
 										{{else}}
-											{{>fragmenttagp}}
+											{{#if equals tag "hr"}}
+												{{>fragmenttaghr}}
+											{{else}}
+												{{>fragmenttagp}}
+											{{/if}}
 										{{/if}}
 									{{/if}}
 								{{/if}}
@@ -117,7 +129,7 @@
 			  <option {{selected tag "h3"}}>h3</option>
 			  <option {{selected tag "h4"}}>h4</option>
 			  <option {{selected tag "bq"}}>bq</option>
-			  <option {{selected tag "sh"}}>sh</option>
+			  <option {{selected tag "nb"}}>nb</option>
 			</select>
 		</div>
 		{{>fragmentproxy}}
