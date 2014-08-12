@@ -167,12 +167,18 @@ if (Meteor.isClient) {
     }
   });
 
+  function getSelectionRange(cb) {
+    var sel = window.getSelection && window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      var range = sel.getRangeAt(0);
+      cb(range);
+    }
+  }
+  //TODO: Will want to put these document binds somewhere else if displaying more than one article at a time
   Template.article.rendered = function() {
     $(document).off('selectionchange');
     $(document).on('selectionchange', function(e, t) {
-      var sel = window.getSelection && window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        var range = sel.getRangeAt(0);
+      getSelectionRange(function(range) {
         var id = $(range.startContainer).parents('.fragment-text').first().attr('data-id');
         if(id && (range.startOffset > 0 || range.endOffset > 0))
         {
@@ -181,8 +187,14 @@ if (Meteor.isClient) {
         else if(id) {
           //savedRanges[id] = { start: 0, end: 0 };
         }
+      });
+    });
+    $(document).on('keydown', function(e) {
+      if(((e.ctrlKey || e.metaKey) && (e.which == 83 || e.which == 115)) || e.which == 27) {
+        Session.set('editing', false);
+        e.preventDefault();
+        return false;
       }
-
     });
 
     this.$('.fragments').sortable({
@@ -486,6 +498,7 @@ if (Meteor.isClient) {
     },
     'keyup .fragment-text': function(e, t) {
       //console.log(e.keyCode);
+      //console.log(e.which);
       //TODO: Catch backspace at start for joining this fragment to previous one, and delete at end for joining next fragment to this one
       if(e.keyCode == 13)
       {
@@ -511,6 +524,16 @@ if (Meteor.isClient) {
         }
         return false;
       }
+      else if(e.keyCode == 27)
+      {
+        getSelectionRange(function(range) {
+          if(range && range.startOffset === 0 && range.endOffset === 0)
+          {
+            Session.set('editing', false);
+          }
+        });
+        return false;
+      }
       else if(e.keyCode == 9) {
         restoreRange(e.currentTarget, this._id);
       }
@@ -523,6 +546,7 @@ if (Meteor.isClient) {
       }
     },
     'keypress .fragment-text': function(e, t) {
+      console.log(e.which, e.ctrlKey, e.metaKey);
       if(e.which == 34 && this.tag != 'q' && this.tag != 'bq')
       {
         var el = $(e.target);
