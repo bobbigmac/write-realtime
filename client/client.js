@@ -382,8 +382,15 @@ if (Meteor.isClient) {
           }
           if(nextText && nextText.length > 0)
           {
-            nextText.focus();
-            //restoreRange(e.target, this._id);//This will only work if you detect and ignore onselectionchanged for this keydown
+            var nextId = nextText.attr('data-id');
+            if(savedRanges && savedRanges[nextId])
+            {
+              restoreRange(nextText.get(0), nextId);
+            }
+            else
+            {
+              nextText.focus();
+            }
             return false;
           }
         }
