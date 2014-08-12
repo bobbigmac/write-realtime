@@ -9,9 +9,9 @@ if (Meteor.isClient) {
       $('.fragments').sortable("option", "disabled", !Session.get('editing'))
     },
     'click .add-new-article': function(e, t) {
-      Articles.insert({ }, function(err, id) {
+      //Articles.insert({ }, function(err, id) {
         addNewArticle(true);
-      });
+      //});
     }
   });
 
@@ -54,13 +54,21 @@ if (Meteor.isClient) {
           }
         }
       }
-      var diff = {}, changeCount = 0;
+
+      var diff = {}, changeCount = 0, newTitle = false;
       for(var i=0; i<highestOf(fragmentIds.length, oldFragmentIds.length); i++)
       {
         if(fragmentIds[i] !== oldFragmentIds[i])
         {
           diff[i] = (fragmentIds[i] ? fragmentIds[i] : null);//Mongo doesn't like undefined, forcing null
+
           changeCount++;
+        }
+        if((i === '0' || i === 0) && position === 0) {
+          newTitle = $('.fragment-container:first .fragment-text').text().substring(0, 128).trim();
+          Articles.update({ _id: articleId }, { $set: { 'title': newTitle }}, function() {
+            //console.log('updated article title after it was edited');
+          });
         }
       }
 
@@ -74,6 +82,12 @@ if (Meteor.isClient) {
           for(var pos in diff)
           {
             setFields['fragmentIds.'+pos] = diff[pos];
+            if((pos === 0 || pos === '0') && diff[pos]) {
+              newTitle = $('.fragment-container:first .fragment-text').text().substring(0, 128).trim();
+              Articles.update({ _id: articleId }, { $set: { 'title': newTitle }}, function() {
+                //console.log('updated article title after it was moved');
+              });
+            }
           }
           Articles.update({ _id: articleId }, { $set: setFields }, function() {
             //console.log('updated by diff');
@@ -167,6 +181,7 @@ if (Meteor.isClient) {
           //savedRanges[id] = { start: 0, end: 0 };
         }
       }
+
     });
 
     this.$('.fragments').sortable({
@@ -330,6 +345,7 @@ if (Meteor.isClient) {
         else
         {
           Fragments.update({_id: this._id}, { $set: { text: firstText }});
+          updateDocumentFragments(undefined, undefined, (globalFragmentIds||[]).indexOf(fragment.attr('data-id')));
 
           //bodges around meteor concatenating session values to div content on rerender (okay here because we're not listening on changed event)
           fragment.text('');
@@ -512,10 +528,11 @@ if (Meteor.isClient) {
     Articles.insert({ }, function(err, id) {
       if(!err)
       {
-        Fragments.insert({text: 'Welcome to your new document '+id, articleId: id}, function(err, fragId) {
+        var defaultText = 'Welcome to your new document '+id;
+        Fragments.insert({text: defaultText, articleId: id}, function(err, fragId) {
           if(!err)
           {
-            Articles.update({ _id: id }, { $set: { fragmentIds: [fragId] }}, function(err, editOk) {
+            Articles.update({ _id: id }, { $set: { fragmentIds: [fragId], title: defaultText }}, function(err, editOk) {
               if(goTo)
               {
                 Session.set('editing', true);
@@ -535,7 +552,7 @@ if (Meteor.isClient) {
     return Router.routes['article'].url({_id: this._id});
   }
   Template.articleLink.linkText = function() {
-    return this._id;
+    return this.title||this._id;
   }
 
 }

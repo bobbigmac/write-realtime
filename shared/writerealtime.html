@@ -20,8 +20,20 @@
 	<a class="btn btn-default github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a>
 </template>
 
+<template name="fragmenttagprivate">
+	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+</template>
+
 <template name="fragmenttagtable">
 	<table contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</table>
+</template>
+
+<template name="fragmenttagquote">
+	<q contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</q>
+</template>
+
+<template name="fragmenttagblockquote">
+	<blockquote contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</blockquote>
 </template>
 
 <template name="fragmenttagspan">
@@ -67,10 +79,22 @@
 						{{#if equals tag "span"}}
 							{{>fragmenttagspan}}
 						{{else}}
-							{{#if equals tag "table"}}
-								{{>fragmenttagtable}}
+							{{#if equals tag "sh"}}
+								{{>fragmenttagprivate}}
 							{{else}}
-								{{>fragmenttagp}}
+								{{#if equals tag "bq"}}
+									{{>fragmenttagblockquote}}
+								{{else}}
+									{{#if equals tag "q"}}
+										{{>fragmenttagquote}}
+									{{else}}
+										{{#if equals tag "table"}}
+											{{>fragmenttagtable}}
+										{{else}}
+											{{>fragmenttagp}}
+										{{/if}}
+									{{/if}}
+								{{/if}}
 							{{/if}}
 						{{/if}}
 					{{/if}}
@@ -85,12 +109,15 @@
 		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i>
 		</div>
 		<div class="options">
-			<select class="form-control select-transparent fragment-set-tag" tabindex="-1" data-width="32">
+			<select class="form-control select-transparent fragment-set-tag" tabindex="-1" data-width="40">
 			  <option {{selected tag "p"}}>p</option>
+			  <option {{selected tag "q"}}>q</option>
 			  <option {{selected tag "h1"}}>h1</option>
 			  <option {{selected tag "h2"}}>h2</option>
 			  <option {{selected tag "h3"}}>h3</option>
 			  <option {{selected tag "h4"}}>h4</option>
+			  <option {{selected tag "bq"}}>bq</option>
+			  <option {{selected tag "sh"}}>sh</option>
 			</select>
 		</div>
 		{{>fragmentproxy}}
