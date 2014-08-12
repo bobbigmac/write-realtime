@@ -308,10 +308,11 @@ if (Meteor.isClient) {
         var el = $(e.target);
         var offset = el.offset();
         var height = el.height(), width = el.width(), top = coords.y - offset.top, left = coords.x - offset.left;
-        var lineHeight = 20; //TODO: By actual line-height
+
+        var lineHeight = parseInt(el.css('line-height')), lineHeightModifier = 1.5;
 
         if((dir == "up" && top <= 2) ||
-          (dir == "down" && top >= (height - lineHeight)))
+          (dir == "down" && top >= (height - (lineHeight * lineHeightModifier))))
         {
           var nextText = false;
           if(dir == "up")
@@ -329,9 +330,22 @@ if (Meteor.isClient) {
             return false;
           }
         }
-        else //TODO: Left/right for paragraph style/reference options UI
+        else
         {
+          if(dir == 'left' && left <= 2)
+          {
+            //TODO: Currently setting next available objects in code, but could be cleverer about what grabs focus next.
+            var typeEl = el.parent().find('div.fragment-set-tag .selectpicker');
 
+            var el = typeEl.get(0);
+            if(el)
+            {
+              var evt = document.createEvent('UIEvents');
+              evt.initUIEvent("click", true, true, window, 1);
+              el.dispatchEvent(evt);
+            }
+            return false;
+          }
         }
       }
     },
@@ -365,12 +379,18 @@ if (Meteor.isClient) {
     'change .fragment-set-tag': function(e, t) {
       var tag = $(e.target).val();
       Fragments.update({_id: this._id}, {$set: {tag: tag}});
+
+      Meteor.setTimeout(function() {
+        var nextText = $(t.find('.fragment-text'));
+        nextText.focus();
+      }, 20);
     }
   });
 
-  function onTagTypeRefresh() {
-    var sPicker = $('.fragment-container[data-id="' + this.data._id + '"] .fragment-set-tag');
-    sPicker.selectpicker('refresh');
+  function onTagTypeRefresh(e, t) {
+    var container = $('.fragment-container[data-id="' + this.data._id + '"]');
+    container.find('.fragment-set-tag').selectpicker('refresh');
+    //container.find('.fragment-text').focus();
   }
 
   //Bind refresh of the non-reactive select when tagtype is changed remotely
@@ -383,7 +403,6 @@ if (Meteor.isClient) {
   Template.fragment.tag = function(e, t) {
     return this.tag||'p';
   };
-  var renderTimeout = false;
   Template.fragment.rendered = function() {
     this.$('.fragment-set-tag').selectpicker();
 
