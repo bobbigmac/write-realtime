@@ -15,28 +15,37 @@
 </template>
 
 <template name="nav">
+	<button class="btn btn-primary edit-article">{{#if editing}}Finished{{else}}Edit{{/if}}</button>
 	<button class="btn btn-primary add-new-article">Add New Article</button>
 	<a class="btn btn-default github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a>
 </template>
 
+<template name="fragmenttagtable">
+	<table contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</table>
+</template>
+
+<template name="fragmenttagspan">
+	<span contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</span>
+</template>
+
 <template name="fragmenttagp">
-	<p contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
 </template>
 
 <template name="fragmenttagh1">
-	<h1 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h1>
+	<h1 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h1>
 </template>
 
 <template name="fragmenttagh2">
-	<h2 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h2>
+	<h2 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h2>
 </template>
 
 <template name="fragmenttagh3">
-	<h3 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h3>
+	<h3 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h3>
 </template>
 
 <template name="fragmenttagh4">
-	<h4 contenteditable="true" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h4>
+	<h4 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h4>
 </template>
 
 <template name="fragmentproxy">
@@ -55,7 +64,15 @@
 					{{#if equals tag "h4"}}
 						{{>fragmenttagh4}}
 					{{else}}
-						{{>fragmenttagp}}
+						{{#if equals tag "span"}}
+							{{>fragmenttagspan}}
+						{{else}}
+							{{#if equals tag "table"}}
+								{{>fragmenttagtable}}
+							{{else}}
+								{{>fragmenttagp}}
+							{{/if}}
+						{{/if}}
 					{{/if}}
 				{{/if}}
 			{{/if}}
@@ -64,7 +81,7 @@
 </template>
 
 <template name="fragment">
-	<div class="fragment-container" data-id="{{this._id}}">
+	<div class="fragment-container" data-id="{{this._id}}" data-tag="{{tag}}" editable="{{editable}}">
 		<div class="handle"><i class="glyphicon glyphicon-th-list"> </i>
 		</div>
 		<div class="options">

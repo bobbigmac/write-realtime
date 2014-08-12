@@ -7,7 +7,11 @@
 	padding-left: 40px;
 	clear: right;
 }
+.fragment-container[data-tag="span"] {
+	display: inline-block;
+}
 .options {
+	display: none;
 	float: left;
 	margin-right: 5px;
 	margin-left: -40px;
@@ -24,6 +28,10 @@
 	opacity: 0.1;
 	font-size: 1.4em;
 	line-height: 1em;
+}
+/*.handle[editable="true"],*/
+.fragment-container[editable="true"] .options {
+	display: block;
 }
 .select-transparent .caret {
 	display: none;

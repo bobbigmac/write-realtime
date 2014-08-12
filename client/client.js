@@ -1,7 +1,13 @@
 
 if (Meteor.isClient) {
 
+  Session.setDefault('editing', false);
+
   Template.nav.events({
+    'click .edit-article': function(e, t) {
+      Session.set('editing', !Session.get('editing'));
+      $('.fragments').sortable("option", "disabled", !Session.get('editing'))
+    },
     'click .add-new-article': function(e, t) {
       Articles.insert({ }, function(err, id) {
         addNewArticle(true);
@@ -167,18 +173,21 @@ if (Meteor.isClient) {
       helper: '.options',
       cancel: '[contenteditable]',
       stop: function(event, ui) {
-        updateDocumentFragments();
+        if(Session.get('editing'))
+        {
+          updateDocumentFragments();
+        }
       },
-      /*start: function(event, ui) {
-        return false;
-      }*/
+      start: function(event, ui) {
+        $('.fragments').sortable("option", "disabled", !Session.get('editing'))
+      }
     }).enableSelection().on('click', function(event, ui) {
       if(event.target)
       {
         //TODO: Currently losing clicked-caret-position with this focus call (and not restoring saved)
         $(event.target).focus();
       }
-    })
+    });
   };
 
   function restoreRange(el, id) {
@@ -272,6 +281,19 @@ if (Meteor.isClient) {
   };
   var startText = false;
   Template.fragment.events({
+    'paste .fragment-text': function(e, t) {
+      //Safely parsing html/markup/scripts is a LOT more complicated, tackle it if you dare :)
+      var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+      if(text && typeof(text) == 'string' && text.trim())
+      {
+        e.preventDefault();
+        $(e.target).text(text);
+      }
+    },
+    'dblclick .fragment-text': function(e, t) {
+      Session.set('editing', true);
+      $('.fragments').sortable("option", "disabled", !Session.get('editing'))
+    },
     'focus .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
       startText = fragment.text();
@@ -415,6 +437,7 @@ if (Meteor.isClient) {
       }
     },
     'keyup .fragment-text': function(e, t) {
+      //TODO: Catch backspace at start for joining this fragment to previous one, and delete at end for joining next fragment to this one
       if(e.keyCode == 13)
       {
         //TODO: If caret is between text (has before and after), edit fragment, and create new fragment at next position with 'after' text
@@ -495,6 +518,8 @@ if (Meteor.isClient) {
             Articles.update({ _id: id }, { $set: { fragmentIds: [fragId] }}, function(err, editOk) {
               if(goTo)
               {
+                Session.set('editing', true);
+                $('.fragments').sortable("option", "disabled", !Session.get('editing'))
                 Router.go('article', { _id: id });
               }
             });
