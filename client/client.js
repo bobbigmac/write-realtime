@@ -450,7 +450,8 @@ if (Meteor.isClient) {
           if(dir == 'left' && (left <= 2 || (this.tag == 'q' && left < 7) || (this.tag == 'bq' && left < 27)))
           {
             //TODO: Currently setting next available objects in code, but could be cleverer about what grabs focus next.
-            var typeEl = el.parent().find('.fragment-set-tag .selectpicker');
+            var parent = el.parent();
+            var typeEl = parent.find('.fragment-set-tag .selectpicker');
 
             var el = typeEl.get(0);
             if(el)
@@ -458,6 +459,7 @@ if (Meteor.isClient) {
               var evt = document.createEvent('UIEvents');
               evt.initUIEvent("click", true, true, window, 1);
               el.dispatchEvent(evt);
+              parent.attr('focussed', 'true');
             }
             return false;
           }
@@ -465,7 +467,7 @@ if (Meteor.isClient) {
       }
     },
     'keyup .fragment-text': function(e, t) {
-      //console.log(e.keyCode);
+      console.log(e.keyCode);
       //TODO: Catch backspace at start for joining this fragment to previous one, and delete at end for joining next fragment to this one
       if(e.keyCode == 13)
       {
