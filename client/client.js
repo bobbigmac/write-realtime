@@ -146,7 +146,7 @@ if (Meteor.isClient) {
       }
     }
 
-    return [{text: "", articleId: articleId}];
+    return false;//[{text: "", articleId: articleId}];
   }
 
   var savedRanges = {};//Store this in a collection if you want it to sync to remote viewers/editors
@@ -289,6 +289,20 @@ if (Meteor.isClient) {
   function highestOf(a, b) {
     return (a > b ? a : b);
   }
+  function insertTextAtCursor(text) {
+    var sel, range, html;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode( document.createTextNode(text) );
+        }
+    } else if (document.selection && document.selection.createRange) {
+        document.selection.createRange().text = text;
+    }
+  }
+
   var arrows = {
     37: "left",
     38: "up",
@@ -305,9 +319,10 @@ if (Meteor.isClient) {
       var text = (e.originalEvent || e).clipboardData.getData('text/plain');
       if(text && typeof(text) == 'string' && text.trim())
       {
-        //e.preventDefault();
+        e.preventDefault();
 
         //TODO: Insert at caret or replace selection, don't replace entire text
+        insertTextAtCursor(text);
         //$(e.target).text(text);
       }
     },
@@ -351,8 +366,11 @@ if (Meteor.isClient) {
         {
           if(this._id)
           {
-            updateDocumentFragments(this._id, true);
-            Fragments.remove({ _id: this._id });
+            if($('.fragment-container').length > 1)
+            {
+              updateDocumentFragments(this._id, true);
+              Fragments.remove({ _id: this._id });
+            }
           }
         }
         else
@@ -467,7 +485,7 @@ if (Meteor.isClient) {
       }
     },
     'keyup .fragment-text': function(e, t) {
-      console.log(e.keyCode);
+      //console.log(e.keyCode);
       //TODO: Catch backspace at start for joining this fragment to previous one, and delete at end for joining next fragment to this one
       if(e.keyCode == 13)
       {
@@ -496,11 +514,20 @@ if (Meteor.isClient) {
       else if(e.keyCode == 9) {
         restoreRange(e.currentTarget, this._id);
       }
-      else if(e.keyCode == 34 || e.keyCode == 222)//TODO: May be 222 instead of 34 because of synergy
+      else if(e.keyCode == 73 && ctrlIsDown) {
+        //console.log('this.inline', this.inline);
+        var el = $(e.target);
+        var id = el.attr('data-id');
+
+        Fragments.update({ _id: id }, { $set: { inline: !this.inline }});
+      }
+    },
+    'keypress .fragment-text': function(e, t) {
+      if(e.which == 34 && this.tag != 'q' && this.tag != 'bq')
       {
         var el = $(e.target);
         var id = el.attr('data-id');
-        if(el.text() == "\"") {
+        if(el.text().length <= 1) {
           Meteor.setTimeout(function() {
             if(el.text() == "\"") {
               Fragments.update({ _id: id }, { $set: { tag: 'q' }}, function(err, changed) {
@@ -513,13 +540,6 @@ if (Meteor.isClient) {
             }
           }, 250);
         }
-      }
-      else if(e.keyCode == 73 && ctrlIsDown) {
-        //console.log('this.inline', this.inline);
-        var el = $(e.target);
-        var id = el.attr('data-id');
-
-        Fragments.update({ _id: id }, { $set: { inline: !this.inline }});
       }
     },
     'change .fragment-set-tag': function(e, t) {
@@ -576,8 +596,8 @@ if (Meteor.isClient) {
     Articles.insert({ }, function(err, id) {
       if(!err)
       {
-        var defaultText = 'Welcome to your new document '+id;
-        Fragments.insert({text: defaultText, articleId: id}, function(err, fragId) {
+        var defaultText = 'Article '+id;
+        Fragments.insert({ text: defaultText, articleId: id, tag: 'h1' }, function(err, fragId) {
           if(!err)
           {
             Articles.update({ _id: id }, { $set: { fragmentIds: [fragId], title: defaultText }}, function(err, editOk) {
