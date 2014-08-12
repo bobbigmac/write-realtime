@@ -479,7 +479,7 @@ if (Meteor.isClient) {
           if(ctrlIsDown) {
             position = (globalFragmentIds||[]).indexOf($(e.target).attr('data-id'))+1;
           }
-          var articleId = $('.fragments').attr('data-id');
+          var articleId = $('.fragments').attr('data-id');//TODO: Support displaying multiple articles in a single page/view t.parent.something
           
           Fragments.insert({ text: '', articleId: articleId }, function(err, id) {
             updateDocumentFragments(id, false, position);
@@ -493,6 +493,25 @@ if (Meteor.isClient) {
       }
       else if(e.keyCode == 9) {
         restoreRange(e.currentTarget, this._id);
+      }
+      else if(e.keyCode == 34 || e.keyCode == 222)//TODO: May be 222 instead of 34 because of synergy
+      {
+        console.log(e.keyCode);
+        var el = $(e.target);
+        var id = el.attr('data-id');
+        if(el.text() == "\"") {
+          Meteor.setTimeout(function() {
+            if(el.text() == "\"") {
+              Fragments.update({ _id: id }, { $set: { tag: 'q' }}, function(err, changed) {
+                if(changed) {
+                  Meteor.defer(function() {
+                    $('.fragment-text[data-id="'+id+'"]').focus().text('').select();
+                  });
+                }
+              });
+            }
+          }, 250);
+        }
       }
     },
     'change .fragment-set-tag': function(e, t) {
