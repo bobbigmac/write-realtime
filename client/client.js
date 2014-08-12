@@ -447,11 +447,10 @@ if (Meteor.isClient) {
         }
         else
         {
-          if(dir == 'left' && left <= 2)
+          if(dir == 'left' && (left <= 2 || (this.tag == 'q' && left < 7) || (this.tag == 'bq' && left < 27)))
           {
             //TODO: Currently setting next available objects in code, but could be cleverer about what grabs focus next.
             var typeEl = el.parent().find('.fragment-set-tag .selectpicker');
-            //$(t.find('.fragment-set-tag')).selectpicker('show');
 
             var el = typeEl.get(0);
             if(el)
@@ -466,6 +465,7 @@ if (Meteor.isClient) {
       }
     },
     'keyup .fragment-text': function(e, t) {
+      //console.log(e.keyCode);
       //TODO: Catch backspace at start for joining this fragment to previous one, and delete at end for joining next fragment to this one
       if(e.keyCode == 13)
       {
@@ -480,8 +480,8 @@ if (Meteor.isClient) {
             position = (globalFragmentIds||[]).indexOf($(e.target).attr('data-id'))+1;
           }
           var articleId = $('.fragments').attr('data-id');//TODO: Support displaying multiple articles in a single page/view t.parent.something
-          
-          Fragments.insert({ text: '', articleId: articleId }, function(err, id) {
+
+          Fragments.insert({ text: '', articleId: articleId, inline: !!this.inline }, function(err, id) {
             updateDocumentFragments(id, false, position);
           });
         }
@@ -496,7 +496,6 @@ if (Meteor.isClient) {
       }
       else if(e.keyCode == 34 || e.keyCode == 222)//TODO: May be 222 instead of 34 because of synergy
       {
-        console.log(e.keyCode);
         var el = $(e.target);
         var id = el.attr('data-id');
         if(el.text() == "\"") {
@@ -512,6 +511,13 @@ if (Meteor.isClient) {
             }
           }, 250);
         }
+      }
+      else if(e.keyCode == 73 && ctrlIsDown) {
+        //console.log('this.inline', this.inline);
+        var el = $(e.target);
+        var id = el.attr('data-id');
+
+        Fragments.update({ _id: id }, { $set: { inline: !this.inline }});
       }
     },
     'change .fragment-set-tag': function(e, t) {
@@ -543,6 +549,9 @@ if (Meteor.isClient) {
   Template.fragmenttagh1.rendered = 
   Template.fragmenttagp.rendered = onTagTypeRefresh; //TODO: Define these from supportedTags array
 
+  Template.fragment.inline = function(e, t) {
+    return this.inline ? 'true' : 'false';
+  };
   Template.fragment.tag = function(e, t) {
     return this.tag||'p';
   };
