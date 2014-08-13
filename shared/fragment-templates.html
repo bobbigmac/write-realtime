@@ -36,6 +36,15 @@
 	{{/if}}
 </template>
 
+<template name="fragmenttagcss">
+	{{#if editing}}
+		<pre contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</pre>
+		<style>{{this.text}}</style>
+	{{else}}
+		<style data-id="{{this._id}}" class="fragment-text">{{this.text}}</style>
+	{{/if}}
+</template>
+
 <template name="fragmenttagpath">
 	{{#if editing}}
 		<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
@@ -111,7 +120,11 @@
 														{{#if equals tag "path"}}
 															{{>fragmenttagpath}}
 														{{else}}
-															{{>fragmenttagp}}
+															{{#if equals tag "css"}}
+																{{>fragmenttagcss}}
+															{{else}}
+																{{>fragmenttagp}}
+															{{/if}}
 														{{/if}}
 													{{/if}}
 												{{/if}}

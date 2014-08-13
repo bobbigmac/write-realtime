@@ -13,11 +13,13 @@
 	display: inline-block;
 	margin: 5px;
 }
+.fragment-container[data-tag="css"][editable="true"] p,
 .fragment-container[data-tag="path"][editable="true"] p,
 .fragment-container[data-tag="tag"][editable="true"] p,
 .fragment-container[data-tag="meta"][editable="true"] p {
 	opacity: 0.5;
 }
+.fragment-container[data-tag="css"][editable="true"] p:focus,
 .fragment-container[data-tag="path"][editable="true"] p:focus,
 .fragment-container[data-tag="tag"][editable="true"] p:focus,
 .fragment-container[data-tag="meta"][editable="true"] p:focus {
@@ -53,10 +55,10 @@
 .options {
 	display: none;
 	position: absolute;
-	margin-right: 5px;
-	margin-left: -50px;
 	font-size: 1.4em;
 	line-height: 1em;
+	left: -50px;
+	top: -2px;
 }
 .handle {
 	display: none;
@@ -86,13 +88,19 @@
 	width: auto !important;
 	float: none !important;
 }
+.select-transparent > button.dropdown-toggle {
+	padding: 5px 2px;
+	margin: 0 !important;
+	width: 100%;
+	text-align: center;
+}
 .select-transparent > button {
 	outline: 0;
 	border: 0;
 	box-shadow: none;
 	text-align: center;
-	line-height: 20px;
-	opacity: 0.5;
+	padding-right: 0;
+	opacity: 0.75;
 	background-color: transparent;
 }
 .github-link, 
