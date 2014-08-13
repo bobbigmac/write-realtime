@@ -56,6 +56,14 @@
 	{{/if}}
 </template>
 
+<template name="fragmenttagpath">
+	{{#if editing}}
+		<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	{{else}}
+		<link rel="canonical" data-id="{{this._id}}" class="fragment-text" href="{{canonical}}" />
+	{{/if}}
+</template>
+
 <template name="fragmenttagtag">
 	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
 </template>
@@ -120,7 +128,11 @@
 													{{#if equals tag "meta"}}
 														{{>fragmenttagmeta}}
 													{{else}}
-														{{>fragmenttagp}}
+														{{#if equals tag "path"}}
+															{{>fragmenttagpath}}
+														{{else}}
+															{{>fragmenttagp}}
+														{{/if}}
 													{{/if}}
 												{{/if}}
 											{{/if}}
@@ -151,6 +163,7 @@
 			  <option {{selected tag "nb"}}>nb</option>
 			  <option {{selected tag "tag"}}>tag</option>
 			  <option {{selected tag "meta"}}>meta</option>
+			  <option {{selected tag "path"}}>path</option>
 			</select>
 		</div>
 		{{>fragmentproxy}}

@@ -74,7 +74,7 @@ Router.map(function() {
     path: '/'
   });
   this.route('article', {
-    path: '/:_id/',
+    path: '/:_id/:path?',
     data: function() {
     	//console.log(this);
     	return { _id: this.params._id };

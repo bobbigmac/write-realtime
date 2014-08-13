@@ -13,10 +13,12 @@
 	display: inline-block;
 	margin: 5px;
 }
+.fragment-container[data-tag="path"][editable="true"] p,
 .fragment-container[data-tag="tag"][editable="true"] p,
 .fragment-container[data-tag="meta"][editable="true"] p {
 	opacity: 0.5;
 }
+.fragment-container[data-tag="path"][editable="true"] p:focus,
 .fragment-container[data-tag="tag"][editable="true"] p:focus,
 .fragment-container[data-tag="meta"][editable="true"] p:focus {
 	opacity: 1;

@@ -10,9 +10,7 @@ if (Meteor.isClient) {
       $('.fragments').sortable("option", "disabled", isEditing)
     },
     'click .add-new-article': function(e, t) {
-      //Articles.insert({ }, function(err, id) {
-        addNewArticle(true);
-      //});
+      addNewArticle(true);
     }
   });
 
@@ -115,7 +113,10 @@ if (Meteor.isClient) {
       var article = Articles.findOne({ _id: articleId });
       if(article)
       {
-        //var fragEndPoint = article.fragmentIds||Session.get('fragmentIds');
+        if(article.title)
+        {
+          document.title = article.title+" on WriteRealtime";
+        }
         var fragmentIds = _.toArray(article.fragmentIds)||[];
         
         var sortedFragments = [];
@@ -146,7 +147,7 @@ if (Meteor.isClient) {
       }
     }
 
-    return false;//[{text: "", articleId: articleId}];
+    return false;
   }
 
   var savedRanges = {};//Store this in a collection if you want it to sync to remote viewers/editors
@@ -332,10 +333,7 @@ if (Meteor.isClient) {
       if(text && typeof(text) == 'string' && text.trim())
       {
         e.preventDefault();
-
-        //TODO: Insert at caret or replace selection, don't replace entire text
         insertTextAtCursor(text);
-        //$(e.target).text(text);
       }
     },
     'dblclick .fragment-text': function(e, t) {
@@ -583,6 +581,9 @@ if (Meteor.isClient) {
   }
 
   //Bind refresh of the non-reactive select when tagtype is changed remotely
+  Template.fragmenttagpath.rendered = 
+  Template.fragmenttagmeta.rendered = 
+  Template.fragmenttagtag.rendered = 
   Template.fragmenttaghr.rendered = 
   Template.fragmenttagtable.rendered = 
   Template.fragmenttagspan.rendered = 
@@ -594,6 +595,10 @@ if (Meteor.isClient) {
   Template.fragmenttagh1.rendered = 
   Template.fragmenttagp.rendered = onTagTypeRefresh; //TODO: Define these from supportedTags array
 
+  Template.fragmenttagpath.canonical = function(e, t) {
+    //TODO: Get article id, get article title, build path, and navigate to it
+    console.log('build canonical url for', this._id, this.text);
+  };
   Template.fragment.inline = function(e, t) {
     return this.inline ? 'true' : 'false';
   };
