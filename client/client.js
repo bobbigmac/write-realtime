@@ -175,6 +175,24 @@ if (Meteor.isClient) {
       cb(range);
     }
   }
+  /*function setupAutorun () {
+    Deps.autorun(function (){
+        var hash =  Session.get('frag');
+        if (hash) {
+          var el = $('.fragment-container[data-id="'+hash+'"]');
+          var offset = el.offset();
+          if (offset){
+            console.log('animating to scroll pos', offset.top);
+            $('html, body').animate({scrollTop: offset.top}, 400);
+            Session.set('hash', '');
+          }
+          else
+          {
+            console.log('no offset', offset, el)
+          }
+        }
+    });
+  }*/
   //TODO: Will want to put these document binds somewhere else if displaying more than one article at a time
   Template.article.rendered = function() {
     $(document).off('selectionchange');
@@ -217,6 +235,7 @@ if (Meteor.isClient) {
         $(event.target).focus();
       }
     });
+    //setupAutorun();
   };
 
   function restoreRange(el, id) {
@@ -577,6 +596,15 @@ if (Meteor.isClient) {
   function onTagTypeRefresh(e, t) {
     var container = $('.fragment-container[data-id="' + this.data._id + '"]');
     container.find('.fragment-set-tag').selectpicker('refresh');
+
+    var frag = Session.get('frag');
+    if(frag && frag == this.data._id) {
+      var offset = container.offset();
+      if (offset){
+        $('html, body').animate({scrollTop: offset.top}, 400);
+        Session.set('frag', null);
+      }
+    }
     //container.find('.fragment-text').focus();
   }
 

@@ -66,7 +66,10 @@ UI.registerHelper('selected', function(key, value){
 
 
 Router.configure({
-  layoutTemplate: 'layout'
+  layoutTemplate: 'layout',
+  after: function() {
+  	Session.set('frag', this.params.hash||null);
+  }
 });
 
 Router.map(function() {
@@ -74,7 +77,7 @@ Router.map(function() {
     path: '/'
   });
   this.route('article', {
-    path: '/:_id/:path?',
+    path: '/:_id',
     data: function() {
     	//console.log(this);
     	return { _id: this.params._id };
