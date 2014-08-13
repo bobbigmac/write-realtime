@@ -13,6 +13,7 @@ if (Meteor.isServer) {
       {
         search._id = options.articleId;
       }
+      //console.log(options, Articles.findOne(search, opts));
       return Articles.find(search, opts);
     });
 

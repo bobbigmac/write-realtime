@@ -85,7 +85,7 @@ Router.map(function() {
   });
 
   this.route('articlebyname', {
-    path: '/:user?/:name', 
+    path: '/:user/:name', 
     onBeforeAction: function() {
     	Session.set('fragmentPathSearch', {name: this.params.name});
     },
