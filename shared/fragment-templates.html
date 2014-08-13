@@ -1,0 +1,129 @@
+
+
+<template name="fragmenttagprivate">
+	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+</template>
+
+<template name="fragmenttaghr">
+	{{#if editing}}
+		<hr data-id="{{this._id}}" class="fragment-text" />
+	{{else}}
+		<hr data-id="{{this._id}}" class="fragment-text" />
+	{{/if}}
+</template>
+
+<template name="fragmenttagtable">
+	<table contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</table>
+</template>
+
+<template name="fragmenttagquote">
+	<q contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</q>
+</template>
+
+<template name="fragmenttagblockquote">
+	<blockquote contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</blockquote>
+</template>
+
+<template name="fragmenttagspan">
+	<span contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</span>
+</template>
+
+<template name="fragmenttagmeta">
+	{{#if editing}}
+		<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	{{else}}
+		<meta data-id="{{this._id}}" class="fragment-text" name="{{split this.text ':' 0}}" content="{{split this.text ':' 1}}" />
+	{{/if}}
+</template>
+
+<template name="fragmenttagpath">
+	{{#if editing}}
+		<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	{{else}}
+		<link rel="canonical" data-id="{{this._id}}" class="fragment-text" href="{{canonical}}" />
+	{{/if}}
+</template>
+
+<template name="fragmenttagtag">
+	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+</template>
+
+<template name="fragmenttagp">
+	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+</template>
+
+<template name="fragmenttagh1">
+	<h1 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h1>
+</template>
+
+<template name="fragmenttagh2">
+	<h2 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h2>
+</template>
+
+<template name="fragmenttagh3">
+	<h3 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h3>
+</template>
+
+<template name="fragmenttagh4">
+	<h4 contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</h4>
+</template>
+
+<template name="fragmentproxy">
+	{{#if equals tag "p"}}
+		{{>fragmenttagp}}
+	{{else}}
+		{{#if equals tag "h1"}}
+			{{>fragmenttagh1}}
+		{{else}}
+			{{#if equals tag "h2"}}
+				{{>fragmenttagh2}}
+			{{else}}
+				{{#if equals tag "h3"}}
+					{{>fragmenttagh3}}
+				{{else}}
+					{{#if equals tag "h4"}}
+						{{>fragmenttagh4}}
+					{{else}}
+						{{#if equals tag "span"}}
+							{{>fragmenttagspan}}
+						{{else}}
+							{{#if equals tag "nb"}}
+								{{>fragmenttagprivate}}
+							{{else}}
+								{{#if equals tag "bq"}}
+									{{>fragmenttagblockquote}}
+								{{else}}
+									{{#if equals tag "q"}}
+										{{>fragmenttagquote}}
+									{{else}}
+										{{#if equals tag "table"}}
+											{{>fragmenttagtable}}
+										{{else}}
+											{{#if equals tag "hr"}}
+												{{>fragmenttaghr}}
+											{{else}}
+												{{#if equals tag "tag"}}
+													{{>fragmenttagtag}}
+												{{else}}
+													{{#if equals tag "meta"}}
+														{{>fragmenttagmeta}}
+													{{else}}
+														{{#if equals tag "path"}}
+															{{>fragmenttagpath}}
+														{{else}}
+															{{>fragmenttagp}}
+														{{/if}}
+													{{/if}}
+												{{/if}}
+											{{/if}}
+										{{/if}}
+									{{/if}}
+								{{/if}}
+							{{/if}}
+						{{/if}}
+					{{/if}}
+				{{/if}}
+			{{/if}}
+		{{/if}}
+	{{/if}}
+</template>

@@ -66,20 +66,63 @@ UI.registerHelper('selected', function(key, value){
 
 
 Router.configure({
-  layoutTemplate: 'layout',
-  after: function() {
-  	Session.set('frag', this.params.hash||null);
-  }
+	layoutTemplate: 'layout',
+	loadingTemplate: 'loading',
+	after: function() {
+		Session.set('frag', this.params.hash||null);
+	},
+	/*waitOn: function () {
+		return Meteor.subscribe('Users');
+	},*/
 });
 
 Router.map(function() {
   this.route('articles', {
-    path: '/'
+    path: '/',
+    onBeforeAction: function() {
+    	Session.set('articleId', null);
+    }
   });
+
+  this.route('articlebyname', {
+    path: '/:user?/:name', 
+    onBeforeAction: function() {
+    	Session.set('fragmentPathSearch', {name: this.params.name});
+    },
+	waitOn: function() {
+		return [
+			Meteor.subscribe('fragments', Session.get('fragmentPathSearch')), 
+			Meteor.subscribe('articles', Session.get('articleId'))
+		];
+	},
+    data: function() {
+    	var fragments = Fragments.find({ tag: 'path', text: this.params.name }).fetch();
+    	//TODO: If more than 1 fragments, display some of each and clickable title (redirect to search route)
+    	if(fragments && fragments[0])
+    	{
+    		Session.set('articleId', { articleId: fragments[0].articleId });
+
+			Meteor.subscribe('fragments', Session.get('articleId'));
+
+	    	return { _id: fragments[0].articleId };
+    	}
+    	return null;
+    }
+  });
+
   this.route('article', {
     path: '/:_id',
+    onBeforeAction: function() {
+    	Session.set('articleId', { articleId: this.params._id });
+    },
+	waitOn: function() {
+		var articleId = Session.get('articleId')||false;
+		return [
+			Meteor.subscribe('fragments', Session.get('articleId')),
+			Meteor.subscribe('articles', articleId),
+		];
+	},
     data: function() {
-    	//console.log(this);
     	return { _id: this.params._id };
     }
   });

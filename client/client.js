@@ -105,6 +105,8 @@ if (Meteor.isClient) {
       console.log('No article', article);
     }
   }
+
+  Template.articlebyname.fragments = 
   Template.article.fragments = function () {
     var articleId = this._id;
     var fragments = Fragments.find({ articleId: articleId });
@@ -153,7 +155,7 @@ if (Meteor.isClient) {
   var savedRanges = {};//Store this in a collection if you want it to sync to remote viewers/editors
 
   var ctrlIsDown = false;
-  Template.article.events({
+  var articleEvents = {
     'keyup': function(e, t) {
       if(ctrlIsDown && !e.ctrlKey)
       {
@@ -166,7 +168,9 @@ if (Meteor.isClient) {
         ctrlIsDown = true;
       }
     }
-  });
+  };
+  Template.articlebyname.events(articleEvents);
+  Template.article.events(articleEvents);
 
   function getSelectionRange(cb) {
     var sel = window.getSelection && window.getSelection();
@@ -175,25 +179,8 @@ if (Meteor.isClient) {
       cb(range);
     }
   }
-  /*function setupAutorun () {
-    Deps.autorun(function (){
-        var hash =  Session.get('frag');
-        if (hash) {
-          var el = $('.fragment-container[data-id="'+hash+'"]');
-          var offset = el.offset();
-          if (offset){
-            console.log('animating to scroll pos', offset.top);
-            $('html, body').animate({scrollTop: offset.top}, 400);
-            Session.set('hash', '');
-          }
-          else
-          {
-            console.log('no offset', offset, el)
-          }
-        }
-    });
-  }*/
   //TODO: Will want to put these document binds somewhere else if displaying more than one article at a time
+  Template.articlebyname.rendered = 
   Template.article.rendered = function() {
     $(document).off('selectionchange');
     $(document).on('selectionchange', function(e, t) {
@@ -207,6 +194,10 @@ if (Meteor.isClient) {
           //savedRanges[id] = { start: 0, end: 0 };
         }
       });
+      /*Deps.autorun(function () {
+        //Meteor.subscribe("chat", {room: Session.get("current-room")});
+        //Meteor.subscribe("privateMessages");
+      });*/
     });
     $(document).on('keydown', function(e) {
       if(((e.ctrlKey || e.metaKey) && (e.which == 83 || e.which == 115)) || e.which == 27) {
@@ -235,7 +226,6 @@ if (Meteor.isClient) {
         $(event.target).focus();
       }
     });
-    //setupAutorun();
   };
 
   function restoreRange(el, id) {
@@ -640,6 +630,11 @@ if (Meteor.isClient) {
     this.$('.fragment-text').focus();
   };
 
+  Template.articles.rendered = function() {
+    Deps.autorun(function() {
+      Meteor.subscribe('articles', Session.get('articleId')||false);
+    })
+  }
   Template.articles.articles = function() {
     return Articles.find({});
   }
