@@ -5,6 +5,7 @@ UI.registerHelper("equals", function (a, b) {
 	return (a == b);
 });
 UI.registerHelper("split", function (text, sep, index) {
+	//TODO: Not sure how to account for namespaced (like og) meta tags
 	return (text||':').split(sep||':')[index];
 });
 function Linkify(inputText) {

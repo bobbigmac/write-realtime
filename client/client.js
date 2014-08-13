@@ -615,7 +615,7 @@ if (Meteor.isClient) {
 
   Template.fragmenttagpath.canonical = function(e, t) {
     //TODO: Get article id, get article title, build path, and navigate to it
-    console.log('build canonical url for', this._id, this.text);
+    //console.log('build canonical url for', this._id, this.text);
   };
   Template.fragment.inline = function(e, t) {
     return this.inline ? 'true' : 'false';
