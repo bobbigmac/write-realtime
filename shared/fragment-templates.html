@@ -1,7 +1,9 @@
 
 
 <template name="fragmenttagprivate">
-	<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	{{#if editing}}
+		<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	{{/if}}
 </template>
 
 <template name="fragmenttaghr">

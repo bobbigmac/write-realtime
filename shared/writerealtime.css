@@ -1,3 +1,10 @@
+/*:root {
+	--blue: #3498db;
+	--dark-blue: #2980b9;
+	--etc
+}Will implement color standard when css vars public in Chrome release*/
+/* http://flatuicolors.com/ */
+
 .fragments {
 	padding-left: 40px;
 	padding-bottom: 200px;
@@ -106,4 +113,13 @@
 .github-link, 
 .add-new-article {
 	margin: 2em;
+}
+.add-new-fragment {
+	opacity: 0.75;
+}
+
+.add-new-fragments {
+	clear: both;
+	float: none;
+	padding-top: 2em;
 }

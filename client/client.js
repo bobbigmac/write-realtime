@@ -192,6 +192,7 @@ if (Meteor.isClient) {
         }
         else if(id) {
           //savedRanges[id] = { start: 0, end: 0 };
+          //TODO: Cursor is at zero, highlight the options box as available on next arrow-left press
         }
       });
       /*Deps.autorun(function () {
@@ -325,13 +326,27 @@ if (Meteor.isClient) {
     }
   }
 
+  Template.addfragment.events({
+    'click .add-new-fragment': function(e, t) {
+      var tagType = $(e.target).attr('data-tag');
+      if(tagType)
+      {
+        Session.set('editing', true);
+        var articleId = $('.fragments').attr('data-id');//TODO: Support displaying multiple articles in a single page/view t.parent.something
+
+        Fragments.insert({ text: '', articleId: articleId, tag: tagType }, function(err, id) {
+          updateDocumentFragments(id, false, false);
+        });
+      }
+    }
+  });
   var arrows = {
     37: "left",
     38: "up",
     39: "right",
     40: "down",
   };
-  var startText = false;
+  var startText = false, startTag = false;
   Template.fragment.events({
     /*'change .fragment-text': function(e, t) {
       console.log('changed');
@@ -351,6 +366,12 @@ if (Meteor.isClient) {
     },
     'focus .fragment-text': function(e, t) {
       var fragment = $(t.find('.fragment-text'));
+      if(fragment.text() == '<')
+      {
+        savedRanges[fragment.attr('data-id')] = { start: 0, end: 1 };
+        //fragment.text('');
+      }
+
       startText = fragment.text();
       fragment.parents('.fragment-container').attr('focussed', 'true');
       //$(e.currentTarget).attr('contenteditable', true);
@@ -419,7 +440,7 @@ if (Meteor.isClient) {
               var position = (globalFragmentIds||[]).indexOf(fragmentId)+1;//+offset;
               var articleId = $('.fragments').attr('data-id');
 
-              Fragments.insert({ text: currText, articleId: articleId, tag: (this.tag == 'tag' ? this.tag : 'p') }, function(err, id) {
+              Fragments.insert({ text: currText, articleId: articleId, tag: (this.tag == 'tag' && !ctrlIsDown ? this.tag : 'p') }, function(err, id) {
                 chainedFragmentIds.push(id);
                 if((offset+1) == chainedFragmentIds.length)
                 {
@@ -453,6 +474,7 @@ if (Meteor.isClient) {
         var scrollTop = $(window).scrollTop(), scrollLeft = $(window).scrollLeft();//This may not play well inside iframes
         var height = el.height(), width = el.width(), top = coords.y - offset.top + scrollTop, left = coords.x - offset.left + scrollLeft;
 
+        //TODO: lineHeight and left/top/bottom/right margin.padding should be determined automatically instead of hardcoding (for case where user tweaks css)
         var lineHeight = highestOf(parseInt(el.css('line-height')), parseInt(el.css('font-size')));
         var lineHeightModifier = 1.5;
 
@@ -488,6 +510,11 @@ if (Meteor.isClient) {
           {
             //TODO: Currently setting next available objects in code, but could be cleverer about what grabs focus next.
             var parent = el.parent();
+            var fragment = parent.find('.fragment-text');
+            if(fragment.text().trim() == '')
+            {
+              fragment.text('<');//Don't delete it when refocussing to tag picker
+            }
             var typeEl = parent.find('.fragment-set-tag .selectpicker');
 
             var el = typeEl.get(0);
@@ -496,6 +523,7 @@ if (Meteor.isClient) {
               var evt = document.createEvent('UIEvents');
               evt.initUIEvent("click", true, true, window, 1);
               el.dispatchEvent(evt);
+
               parent.attr('focussed', 'true');
             }
             return false;
@@ -521,7 +549,7 @@ if (Meteor.isClient) {
           }
           var articleId = $('.fragments').attr('data-id');//TODO: Support displaying multiple articles in a single page/view t.parent.something
 
-          Fragments.insert({ text: '', articleId: articleId, inline: !!this.inline, tag: (this.tag == 'tag' ? this.tag : 'p') }, function(err, id) {
+          Fragments.insert({ text: '', articleId: articleId, inline: !!this.inline, tag: (this.tag == 'tag' && !ctrlIsDown ? this.tag : 'p') }, function(err, id) {
             updateDocumentFragments(id, false, position);
           });
         }
@@ -584,35 +612,58 @@ if (Meteor.isClient) {
   });
 
   function onTagTypeRefresh(e, t) {
+    //console.log('refreshing tag type', this.data._id, this.data.tag);
     var container = $('.fragment-container[data-id="' + this.data._id + '"]');
     container.find('.fragment-set-tag').selectpicker('refresh');
+    // if generating tags dynamically.. it's not updating selectpicker to show correct option when changed remotely (need to force rerender the selected attribute)
 
     var frag = Session.get('frag');
     if(frag && frag == this.data._id) {
       var offset = container.offset();
       if (offset){
+        console.log('scrolling to container');
         $('html, body').animate({scrollTop: offset.top}, 400);
         Session.set('frag', null);
+      }
+      else
+      {
+        console.log('no offset')
       }
     }
     //container.find('.fragment-text').focus();
   }
 
-  //Bind refresh of the non-reactive select when tagtype is changed remotely
-  Template.fragmenttagpath.rendered = 
-  Template.fragmenttagmeta.rendered = 
-  Template.fragmenttagtag.rendered = 
-  Template.fragmenttaghr.rendered = 
-  Template.fragmenttagtable.rendered = 
-  Template.fragmenttagspan.rendered = 
-  Template.fragmenttagquote.rendered = 
-  Template.fragmenttagblockquote.rendered = 
-  Template.fragmenttagh4.rendered = 
-  Template.fragmenttagh3.rendered = 
-  Template.fragmenttagh2.rendered = 
-  Template.fragmenttagh1.rendered = 
-  Template.fragmenttagp.rendered = onTagTypeRefresh; //TODO: Define these from supportedTags array
-
+  var allTags = {
+    'p': 'p', 
+    'q': 'quote', 
+    'h1': 'h1', 
+    'h2': 'h2', 
+    'h3': 'h3', 
+    'h4': 'h4', 
+    'bq': 'blockquote', 
+    'nb': 'private', 
+    'tag': 'tag', 
+    'css': 'css', 
+    'meta': 'meta', 
+    'path': 'path',
+    /*'hr': 'hr',
+    'table': 'table',
+    'span': 'span',*/
+  };
+  Template.addfragment.tags = function(e, t) {
+    return _.map(allTags, function(el, key) {
+      return key;
+    });
+  };
+  Template.fragment.tags = function(e, t) {
+    return _.map(allTags, function(el, key) {
+      return key;
+    });
+  };
+  for(var tag in allTags)
+  {
+    Template['fragmenttag'+allTags[tag]].rendered = onTagTypeRefresh;
+  }
   Template.fragmenttagpath.canonical = function(e, t) {
     //TODO: Get article id, get article title, build path, and navigate to it
     //console.log('build canonical url for', this._id, this.text);

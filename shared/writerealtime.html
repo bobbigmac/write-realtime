@@ -57,11 +57,23 @@
 	<p><a href="{{linkUrl}}">{{linkText}}</a></p>
 </template>
 
+<template name="addfragment">
+	<div class="add-new-fragments">
+		{{#each tags}}
+		<a class="btn add-new-fragment" data-tag="{{this}}">
+			<i class="glyphicon glyphicon-plus"></i>
+			{{this}}
+		</a>
+		{{/each}}
+	</div>
+</template>
+
 <template name="article">
 	<div class="fragments" data-id="{{this._id}}">
 		{{#each fragments}}
 			{{>fragment}}
 		{{/each}}
+		{{>addfragment}}
 	</div>
 </template>
 

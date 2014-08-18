@@ -62,6 +62,7 @@ UI.registerHelper('editing', function(key, value){
 	return Session.get('editing');
 });
 UI.registerHelper('selected', function(key, value){
+	//console.log(key, 'vs', value)
 	return key == value ? {selected:'selected'} : '';
 });
 
