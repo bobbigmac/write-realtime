@@ -29,9 +29,10 @@ UI.registerHelper('editable', function(key, value){
 	var id = this._id;
 	//Maybe overkill, but only solution I can find since .rendered now only fires on creation. Is there a .updated or similar yet?
 	Meteor.defer(function() {
-	    var matchEl = $('.fragment-text[data-id="'+id+'"]');
+	    var matchEl = $('.fragment-text[data-id="'+id+'"]').not('style,meta');
 	    if(matchEl.length > 0)
 	    {
+	    	console.log(matchEl);
 			if(matchEl.attr('contenteditable') !== 'true')
 			{
 				var text = matchEl.text();
