@@ -5,8 +5,7 @@
 
 standard-app-packages
 insecure
-spiderable
 iron:router
+mrt:jquery-ui-sortable
 mizzao:bootstrap-3
 mrt:bootstrap-select
-mrt:jquery-ui-sortable
