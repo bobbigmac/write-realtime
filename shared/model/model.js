@@ -4,10 +4,12 @@ Articles = new Meteor.Collection('articles');
 UI.registerHelper("equals", function (a, b) {
 	return (a == b);
 });
+
 UI.registerHelper("split", function (text, sep, index) {
 	//TODO: Not sure how to account for namespaced (like og) meta tags
 	return (text||':').split(sep||':')[index];
 });
+
 function Linkify(inputText) {
 	//See http://stackoverflow.com/a/2166104/1358220
 	//URLs starting with http://, https://, or ftp://
@@ -24,6 +26,11 @@ function Linkify(inputText) {
 
 	return replacedText
 }
+
+UI.registerHelper('articleTitleFromId', function(key, value){
+	return 'Temp title for ' + key;
+});
+
 UI.registerHelper('editable', function(key, value){
 	var isEditing = Session.get('editing');
 	var id = this._id;
@@ -32,7 +39,6 @@ UI.registerHelper('editable', function(key, value){
 	    var matchEl = $('.fragment-text[data-id="'+id+'"]').not('style,meta');
 	    if(matchEl.length > 0)
 	    {
-	    	console.log(matchEl);
 			if(matchEl.attr('contenteditable') !== 'true')
 			{
 				var text = matchEl.text();
@@ -59,9 +65,11 @@ UI.registerHelper('editable', function(key, value){
 
 	return isEditing ? 'true' : 'false';
 });
+
 UI.registerHelper('editing', function(key, value){
 	return Session.get('editing');
 });
+
 UI.registerHelper('selected', function(key, value){
 	//console.log(key, 'vs', value)
 	return key == value ? {selected:'selected'} : '';
@@ -84,6 +92,7 @@ Router.map(function() {
     path: '/',
     onBeforeAction: function() {
     	Session.set('articleId', null);
+    	this.next();
     }
   });
 
@@ -91,6 +100,7 @@ Router.map(function() {
     path: '/:user/:name', 
     onBeforeAction: function() {
     	Session.set('fragmentPathSearch', {name: this.params.name});
+    	this.next();
     },
 	waitOn: function() {
 		return [
@@ -117,6 +127,7 @@ Router.map(function() {
     path: '/:_id',
     onBeforeAction: function() {
     	Session.set('articleId', { articleId: this.params._id });
+    	this.next();
     },
 	waitOn: function() {
 		var articleId = Session.get('articleId')||false;

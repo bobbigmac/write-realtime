@@ -7,15 +7,19 @@
 </template>
 
 <template name="fragmenttaghr">
-	{{#if editing}}
-		<hr data-id="{{this._id}}" class="fragment-text" />
-	{{else}}
-		<hr data-id="{{this._id}}" class="fragment-text" />
-	{{/if}}
+	<hr data-id="{{this._id}}" class="fragment-text" />
 </template>
 
 <template name="fragmenttagtable">
 	<table contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</table>
+</template>
+
+<template name="fragmenttagreply">
+	{{#if editing}}
+		<p contenteditable="{{editable}}" data-id="{{this._id}}" class="fragment-text">{{this.text}}</p>
+	{{else}}
+		<a href="{{pathFor 'article' this.text}}" data-id="{{this._id}}" class="fragment-text">{{articleTitleFromId this.text}}</a>
+	{{/if}}
 </template>
 
 <template name="fragmenttagquote">
@@ -125,7 +129,11 @@
 															{{#if equals tag "css"}}
 																{{>fragmenttagcss}}
 															{{else}}
-																{{>fragmenttagp}}
+																{{#if equals tag "re"}}
+																	{{>fragmenttagreply}}
+																{{else}}
+																	{{>fragmenttagp}}
+																{{/if}}
 															{{/if}}
 														{{/if}}
 													{{/if}}
