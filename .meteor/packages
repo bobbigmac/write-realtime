@@ -7,5 +7,9 @@ standard-app-packages
 insecure
 iron:router
 mrt:jquery-ui-sortable
-mizzao:bootstrap-3
 mrt:bootstrap-select
+alanning:roles
+ongoworks:security
+accounts-password
+ian:accounts-ui-bootstrap-3
+twbs:bootstrap

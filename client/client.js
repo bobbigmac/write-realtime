@@ -7,6 +7,9 @@ Template.nav.events({
     Session.set('editing', !isEditing);
     $('.fragments').sortable("option", "disabled", isEditing)
   },
+  // 'click .nav-brand': function(e, t) {
+  //   Router.go('/');
+  // },
   'click .add-new-article': function(e, t) {
     addNewArticle(true);
   }
@@ -149,14 +152,27 @@ var renderFragments = function () {
   return false;
 };
 
+var checkMightRemove = function() {
+  return Session.get('mightRemove');
+}
+var isArticleOwner = function() {
+  return (this.owner && this.owner === Meteor.userId());
+};
+
 Template.articlebyname.helpers({
-  fragments: renderFragments
+  fragments: renderFragments,
+  isOwner: isArticleOwner,
+  checkForSure: checkMightRemove
 });
 Template.article.helpers({
-  fragments: renderFragments
+  fragments: renderFragments,
+  isOwner: isArticleOwner,
+  checkForSure: checkMightRemove
 });
 
 var savedRanges = {};//Store this in a collection if you want it to sync to remote viewers/editors
+
+Session.setDefault('mightRemove', false);
 
 var ctrlIsDown = false;
 var articleEvents = {
@@ -171,6 +187,18 @@ var articleEvents = {
     {
       ctrlIsDown = true;
     }
+  },
+  'click .do-not-remove-article': function(e, t) {
+    Session.set('mightRemove', false);
+  },
+  'click .might-remove-article': function(e, t) {
+    Session.set('mightRemove', true);
+  },
+  'click .remove-article': function(e, t) {
+    Session.set('mightRemove', false);
+    Articles.remove(this._id, function() {
+      Router.go('/');
+    });
   }
 };
 Template.articlebyname.events(articleEvents);
@@ -186,6 +214,9 @@ function getSelectionRange(cb) {
 //TODO: Will want to put these document binds somewhere else if displaying more than one article at a time
 Template.articlebyname.rendered = 
 Template.article.rendered = function() {
+  Session.set('mightRemove', false);
+  Session.set('editing', false);
+
   $(document).off('selectionchange');
   $(document).on('selectionchange', function(e, t) {
     getSelectionRange(function(range) {
@@ -352,9 +383,6 @@ var arrows = {
 };
 var startText = false, startTag = false;
 Template.fragment.events({
-  /*'change .fragment-text': function(e, t) {
-    console.log('changed');
-  },*/
   'paste .fragment-text': function(e, t) {
     //Safely parsing html/markup/scripts is a LOT more complicated, tackle it if you dare :)
     var text = (e.originalEvent || e).clipboardData.getData('text/plain');
@@ -536,8 +564,6 @@ Template.fragment.events({
     }
   },
   'keyup .fragment-text': function(e, t) {
-    //console.log(e.keyCode);
-    //console.log(e.which);
     //TODO: Catch backspace at start for joining this fragment to previous one, and delete at end for joining next fragment to this one
     if(e.keyCode == 13)
     {
@@ -584,7 +610,6 @@ Template.fragment.events({
     }
   },
   'keypress .fragment-text': function(e, t) {
-    //console.log(e.which, e.ctrlKey, e.metaKey);
     if(e.which == 34 && this.tag != 'q' && this.tag != 'bq')
     {
       var el = $(e.target);
@@ -616,7 +641,6 @@ Template.fragment.events({
 });
 
 function onTagTypeRefresh(e, t) {
-  //console.log('refreshing tag type', this.data._id, this.data.tag);
   var container = $('.fragment-container[data-id="' + this.data._id + '"]');
   container.find('.fragment-set-tag').selectpicker('refresh');
   // if generating tags dynamically.. it's not updating selectpicker to show correct option when changed remotely (need to force rerender the selected attribute)
@@ -625,7 +649,6 @@ function onTagTypeRefresh(e, t) {
   if(frag && frag == this.data._id) {
     var offset = container.offset();
     if (offset){
-      console.log('scrolling to container');
       $('html, body').animate({scrollTop: offset.top}, 400);
       Session.set('frag', null);
     }
@@ -707,12 +730,15 @@ Template.articles.helpers({
   }
 });
 Template.articles.events({
-  'click .remove-article': function(e, t) {
-
-  }
 });
+
 function addNewArticle(goTo) {
-  Articles.insert({ }, function(err, id) {
+  var userId = Meteor.userId();
+  var article = {};
+  if(userId) {
+    article.owner = userId;
+  }
+  Articles.insert(article, function(err, id) {
     if(!err)
     {
       var defaultText = 'Article '+id;

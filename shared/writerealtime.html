@@ -19,10 +19,21 @@
 </template>
 
 <template name="nav">
-	<button class="btn btn-primary edit-article">{{#if editing}}Finished{{else}}Edit{{/if}}</button>
-	<button class="btn btn-primary add-new-article">Add New Article</button>
-	<a class="btn btn-default github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a>
-	Hello
+	<div class="navbar navbar-default" role="navigation">
+	    <div class="navbar-header">
+	        <a class="navbar-brand" href="/">Articles</a>
+	    </div>
+	    <div class="navbar-collapse collapse">
+	        <ul class="nav navbar-nav">
+				<li><a class="edit-article" href="#">{{#if editing}}Finished{{else}}Edit{{/if}}</a></li>
+				<li><a class="add-new-article" href="#">Add New Article</a></li>
+				<li><a class="github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a></li>
+	        </ul>
+	        <ul class="nav navbar-nav navbar-right">
+	            {{> loginButtons}}
+	        </ul>
+	    </div>
+	</div>
 </template>
 
 <template name="fragment">
@@ -76,6 +87,16 @@
 			{{>fragment}}
 		{{/each}}
 		{{>addfragment}}
+		{{#if isOwner}}
+			{{#if checkForSure}}
+				<div class="pull-right">
+					<a class="btn btn-danger remove-article" href="#"><i class="glyphicon glyphicon-trash"></i> Are you sure?</a>
+					<a class="btn btn-success do-not-remove-article" href="#"><i class="glyphicon glyphicon-cross"></i> Nevermind</a>
+				</div>
+			{{else}}
+				<a class="btn btn-warning pull-right might-remove-article" href="#"><i class="glyphicon glyphicon-trash"></i> Remove Article</a>
+			{{/if}}
+		{{/if}}
 	</div>
 </template>
 

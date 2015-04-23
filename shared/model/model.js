@@ -109,15 +109,17 @@ Router.map(function() {
 		];
 	},
     data: function() {
+    	//TODO: This is weird
     	var fragments = Fragments.find({ tag: 'path', text: this.params.name }).fetch();
     	//TODO: If more than 1 fragments, display some of each and clickable title (redirect to search route)
     	if(fragments && fragments[0])
     	{
-    		Session.set('articleId', { articleId: fragments[0].articleId });
+    		var article = Articles.findOne(fragments[0].articleId);
+    		Session.set('articleId', { articleId: article._id });
 
 			Meteor.subscribe('fragments', Session.get('articleId'));
 
-	    	return { _id: fragments[0].articleId };
+	    	return article;
     	}
     	return null;
     }
@@ -137,7 +139,8 @@ Router.map(function() {
 		];
 	},
     data: function() {
-    	return { _id: this.params._id };
+    	var article = Articles.findOne(this.params._id);
+    	return article;
     }
   });
 });
