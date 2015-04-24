@@ -1,6 +1,11 @@
 
 Session.setDefault('editing', false);
 
+Template.nav.helpers({
+  editable: function() {
+    return Session.get('editable');
+  }
+});
 Template.nav.events({
   'click .edit-article': function(e, t) {
     var isEditing = Session.get('editing');

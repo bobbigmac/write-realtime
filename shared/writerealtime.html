@@ -25,7 +25,9 @@
 	    </div>
 	    <div class="navbar-collapse collapse">
 	        <ul class="nav navbar-nav">
-				<li><a class="edit-article" href="#">{{#if editing}}Finished{{else}}Edit{{/if}}</a></li>
+	        	{{#if editable}}
+					<li><a class="edit-article" href="#">{{#if editing}}Finished{{else}}Edit{{/if}}</a></li>
+				{{/if}}
 				<li><a class="add-new-article" href="#">Add New Article</a></li>
 				<li><a class="github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a></li>
 	        </ul>
@@ -73,10 +75,10 @@
 <template name="addfragment">
 	<div class="add-new-fragments">
 		{{#each tags}}
-		<a class="btn add-new-fragment" data-tag="{{this}}">
-			<i class="glyphicon glyphicon-plus"></i>
-			{{this}}
-		</a>
+			<a class="btn add-new-fragment" data-tag="{{this}}">
+				<i class="glyphicon glyphicon-plus"></i>
+				{{this}}
+			</a>
 		{{/each}}
 	</div>
 </template>

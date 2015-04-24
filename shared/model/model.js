@@ -91,6 +91,7 @@ Router.map(function() {
   this.route('articles', {
     path: '/',
     onBeforeAction: function() {
+    	Session.set('editable', false);
     	Session.set('articleId', null);
     	this.next();
     }
@@ -99,6 +100,7 @@ Router.map(function() {
   this.route('articlebyname', {
     path: '/:user/:name', 
     onBeforeAction: function() {
+    	Session.set('editable', false);
     	Session.set('fragmentPathSearch', {name: this.params.name});
     	this.next();
     },
@@ -116,6 +118,7 @@ Router.map(function() {
     	{
     		var article = Articles.findOne(fragments[0].articleId);
     		Session.set('articleId', { articleId: article._id });
+    		Session.set('editable', true);
 
 			Meteor.subscribe('fragments', Session.get('articleId'));
 
@@ -128,6 +131,7 @@ Router.map(function() {
   this.route('article', {
     path: '/:_id',
     onBeforeAction: function() {
+    	Session.set('editable', false);
     	Session.set('articleId', { articleId: this.params._id });
     	this.next();
     },
@@ -140,6 +144,7 @@ Router.map(function() {
 	},
     data: function() {
     	var article = Articles.findOne(this.params._id);
+    	Session.set('editable', true);
     	return article;
     }
   });
