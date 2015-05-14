@@ -1,26 +1,8 @@
 
 Session.setDefault('editing', false);
+Session.setDefault('globalFragmentIds', []);
 
-Template.nav.helpers({
-  editable: function() {
-    return Session.get('editable');
-  }
-});
-Template.nav.events({
-  'click .edit-article': function(e, t) {
-    var isEditing = Session.get('editing');
-    Session.set('editing', !isEditing);
-    $('.fragments').sortable("option", "disabled", isEditing)
-  },
-  // 'click .nav-brand': function(e, t) {
-  //   Router.go('/');
-  // },
-  'click .add-new-article': function(e, t) {
-    addNewArticle(true);
-  }
-});
 
-var globalFragmentIds = false;
 function updateDocumentFragments(id, remove, position) {
   id = (id instanceof Array ? id : (id ? [id] : []));
 
@@ -79,7 +61,7 @@ function updateDocumentFragments(id, remove, position) {
 
     if(changeCount)
     {
-      globalFragmentIds = fragmentIds;
+      Session.set('globalFragmentIds', fragmentIds);
       if(oldFragmentIds && oldFragmentIds.length > 0)
       {
         //Update mongo record with diff (so not sending entire list every change)
@@ -136,7 +118,7 @@ var renderFragments = function () {
           }
         });
       }
-      globalFragmentIds = fragmentIds;
+      Session.set('globalFragmentIds', fragmentIds);
 
       if(fragmentIds.length)
       {
@@ -178,19 +160,19 @@ Template.article.helpers({
 var savedRanges = {};//Store this in a collection if you want it to sync to remote viewers/editors
 
 Session.setDefault('mightRemove', false);
+Session.setDefault('ctrlIsDown', false);
 
-var ctrlIsDown = false;
 var articleEvents = {
   'keyup': function(e, t) {
-    if(ctrlIsDown && !e.ctrlKey)
+    if(!Session.get('ctrlIsDown') && !e.ctrlKey)
     {
-      ctrlIsDown = false;
+      Session.set('ctrlIsDown', false);
     }
   },
   'keydown': function(e, t) {
-    if(!ctrlIsDown && e.ctrlKey)
+    if(!Session.get('ctrlIsDown') && e.ctrlKey)
     {
-      ctrlIsDown = true;
+      Session.set('ctrlIsDown', true);
     }
   },
   'click .do-not-remove-article': function(e, t) {
@@ -453,7 +435,7 @@ Template.fragment.events({
       else
       {
         Fragments.update({_id: this._id}, { $set: { text: firstText }});
-        updateDocumentFragments(undefined, undefined, (globalFragmentIds||[]).indexOf(fragment.attr('data-id')));
+        updateDocumentFragments(undefined, undefined, Session.get('globalFragmentIds').indexOf(fragment.attr('data-id')));
 
         //bodges around meteor concatenating session values to div content on rerender (okay here because we're not listening on changed event)
         fragment.text('');
@@ -474,10 +456,10 @@ Template.fragment.events({
         {
           var chainedFragmentIds = [];
           (function(fragmentId, offset) {
-            var position = (globalFragmentIds||[]).indexOf(fragmentId)+1;//+offset;
+            var position = Session.get('globalFragmentIds').indexOf(fragmentId)+1;//+offset;
             var articleId = $('.fragments').attr('data-id');
 
-            Fragments.insert({ text: currText, articleId: articleId, tag: (this.tag == 'tag' && !ctrlIsDown ? this.tag : 'p') }, function(err, id) {
+            Fragments.insert({ text: currText, articleId: articleId, tag: (this.tag == 'tag' && !Session.get('ctrlIsDown') ? this.tag : 'p') }, function(err, id) {
               chainedFragmentIds.push(id);
               if((offset+1) == chainedFragmentIds.length)
               {
@@ -491,7 +473,7 @@ Template.fragment.events({
     }
 
     startText = false;
-    ctrlIsDown = false;
+    Session.set('ctrlIsDown');
   },
   'keydown .fragment-text': function(e, t) {
     if(e.keyCode == 13)
@@ -575,16 +557,16 @@ Template.fragment.events({
       //TODO: If caret is between text (has before and after), edit fragment, and create new fragment at next position with 'after' text
       //TODO: If caret is selection, remove selection from fragment and create fragment in next position
       var nextText = $(e.target).parent().next().find('.fragment-text').first();
-      if(!(nextText && nextText.length > 0) || ctrlIsDown)
+      if(!(nextText && nextText.length > 0) || Session.get('ctrlIsDown'))
       {
         var position = false;
         //Use ctrl+enter to insert after the current fragment
-        if(ctrlIsDown) {
-          position = (globalFragmentIds||[]).indexOf($(e.target).attr('data-id'))+1;
+        if(Session.get('ctrlIsDown')) {
+          position = Session.get('globalFragmentIds').indexOf($(e.target).attr('data-id'))+1;
         }
         var articleId = $('.fragments').attr('data-id');//TODO: Support displaying multiple articles in a single page/view t.parent.something
 
-        Fragments.insert({ text: '', articleId: articleId, inline: !!this.inline, tag: (this.tag == 'tag' && !ctrlIsDown ? this.tag : 'p') }, function(err, id) {
+        Fragments.insert({ text: '', articleId: articleId, inline: !!this.inline, tag: (this.tag == 'tag' && !Session.get('ctrlIsDown') ? this.tag : 'p') }, function(err, id) {
           updateDocumentFragments(id, false, position);
         });
       }
@@ -607,7 +589,7 @@ Template.fragment.events({
     else if(e.keyCode == 9) {
       restoreRange(e.currentTarget, this._id);
     }
-    else if(e.keyCode == 73 && ctrlIsDown) {
+    else if(e.keyCode == 73 && Session.get('ctrlIsDown')) {
       var el = $(e.target);
       var id = el.attr('data-id');
 
@@ -645,127 +627,7 @@ Template.fragment.events({
   }
 });
 
-function onTagTypeRefresh(e, t) {
-  var container = $('.fragment-container[data-id="' + this.data._id + '"]');
-  container.find('.fragment-set-tag').selectpicker('refresh');
-  // if generating tags dynamically.. it's not updating selectpicker to show correct option when changed remotely (need to force rerender the selected attribute)
 
-  var frag = Session.get('frag');
-  if(frag && frag == this.data._id) {
-    var offset = container.offset();
-    if (offset){
-      $('html, body').animate({scrollTop: offset.top}, 400);
-      Session.set('frag', null);
-    }
-    else
-    {
-      console.log('no offset')
-    }
-  }
-  //container.find('.fragment-text').focus();
-}
-
-var allTags = {
-  'p': 'p', 
-  'q': 'quote', 
-  'h1': 'h1', 
-  'h2': 'h2', 
-  'h3': 'h3', 
-  'h4': 'h4', 
-  'bq': 'blockquote', 
-  'nb': 'private',
-  're': 'reply', 
-  'tag': 'tag', 
-  'css': 'css', 
-  'meta': 'meta', 
-  'path': 'path',
-  /*'hr': 'hr',
-  'table': 'table',
-  'span': 'span',*/
-};
-Template.addfragment.helpers({
-  tags: function(e, t) {
-    return _.map(allTags, function(el, key) {
-      return key;
-    });
-  }
-});
-Template.fragment.helpers({
-  tags: function(e, t) {
-    return _.map(allTags, function(el, key) {
-      return key;
-    });
-  }
-});
-
-for(var tag in allTags)
-{
-  Template['fragmenttag'+allTags[tag]].rendered = onTagTypeRefresh;
-}
-Template.fragmenttagpath.helpers({
-  canonical: function(e, t) {
-    //TODO: Get article id, get article title, build path, and navigate to it
-    //console.log('build canonical url for', this._id, this.text);
-  }
-});
-Template.fragment.helpers({
-  inline: function(e, t) {
-    return this.inline ? 'true' : 'false';
-  },
-  tag: function(e, t) {
-    return this.tag||'p';
-  }
-});
-
-Template.fragment.rendered = function() {
-  this.$('.fragment-set-tag').selectpicker();
-
-  //TODO: Probably want to focus only after an enter-press
-  this.$('.fragment-text').focus();
-};
-
-Template.articles.rendered = function() {
-  Deps.autorun(function() {
-    Meteor.subscribe('articles', Session.get('articleId')||false);
-  })
-}
-Template.articles.helpers({
-  articles: function() {
-    return Articles.find({});
-  }
-});
-Template.articles.events({
-});
-
-function addNewArticle(goTo) {
-  var userId = Meteor.userId();
-  var article = {};
-  if(userId) {
-    article.owner = userId;
-  }
-  Articles.insert(article, function(err, id) {
-    if(!err)
-    {
-      var defaultText = 'Article '+id;
-      Fragments.insert({ text: defaultText, articleId: id, tag: 'h1' }, function(err, fragId) {
-        if(!err)
-        {
-          Articles.update({ _id: id }, { $set: { fragmentIds: [fragId], title: defaultText }}, function(err, editOk) {
-            if(goTo)
-            {
-              Session.set('editing', true);
-              $('.fragments').sortable("option", "disabled", !Session.get('editing'))
-              Router.go('article', { _id: id });
-            }
-          });
-        }
-      });
-    }
-    else {
-      console.log('Could not create new article', err);
-    }
-  });
-}
 Template.articleLink.helpers({
   linkUrl: function() {
     return Router.routes['article'].url({_id: this._id});

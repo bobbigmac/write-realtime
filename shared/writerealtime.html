@@ -28,7 +28,9 @@
 	        	{{#if editable}}
 					<li><a class="edit-article" href="#">{{#if editing}}Finished{{else}}Edit{{/if}}</a></li>
 				{{/if}}
-				<li><a class="add-new-article" href="#">Add New Article</a></li>
+				{{#if currentUser}}
+					<li><a class="add-new-article" href="#">Add New Article</a></li>
+				{{/if}}
 				<li><a class="github-link" href="https://github.com/bobbigmac/write-realtime">View on github</a></li>
 	        </ul>
 	        <ul class="nav navbar-nav navbar-right">
